@@ -106,10 +106,13 @@ Web Apps publish parameters set to clean all existing files in the webapp folder
 To publish the dashboard project you use the similar publish steps and select the Dashboard WebApp in the Arm template created empty WebApp project list. Also you have to enter authentication Active Directory (AD), so only the users defined under this AD will be able to access the Dashboard webpage.  
 ![](./imgs/img11_5.png)
 
-**WebJobBillingData Project:** Update the corresponding parameters in App.config file with the ones in the Powershell script output. This webjob project is created as a continuous webjob type. So it will always run in the background and in case there is a message in the storage queue, it will trigger a specific function in the project. So if you update the “ida:QueueBillingDataRequests” parameter in the config files, you have to update the function signature with new parameter value which has to be static coded in the function.cs file of the WebJobBillingData project as:
+**WebJobBillingData Project:** 
+
+Update the corresponding parameters in App.config file with the ones in the Powershell script output. This webjob project is created as a continuous webjob type. So it will always run in the background and in case there is a message in the storage queue, it will trigger a specific function in the project. So if you update the “ida:QueueBillingDataRequests” parameter in the config files, you have to update the function signature with new parameter value which has to be static coded in the function.cs file of the WebJobBillingData project as:
 ```
 public static void ProcessQueueMessage([QueueTrigger("billingdatarequests")] BillingRequest br)
 ```
+The **WebJobBillingData** App.config file is also where you'll specify what offer code should be used for calculating billing costs.  You can [view a list of Azure Offer Codes](https://azure.microsoft.com/en-us/support/legal/offer-details/) and then enter that code in for the "ida:OfferCode" value.  You are also able to specify the Currency, Locale, and RegionInfo here.  Important to note is that the website displays the offer number's which are most likely preceded by *MS-AZR-* so, the offer code for pay-as-you-go ends up being MS-AZR-0003P.  Also **IMPORTANT** to note is that currently, it is not possible to specify different offer code's or currency per subscription.  
 
 To publish the WebJobBillingData webjob project, right click on the project name in the solution explorer and click on the *Publish as Azure WebJob...* menu item.  
 ![](./imgs/img11_6.png)
