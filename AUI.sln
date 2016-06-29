@@ -1,0 +1,104 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registration", "Registration\Registration.csproj", "{02F2B948-C602-497D-B01A-072B66E8D98D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashboard", "Dashboard\Dashboard.csproj", "{361F1A70-5B95-4727-A233-E9820B317EBC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commons", "Commons\Commons.csproj", "{9BB3471D-F136-4E7B-9E54-91B1688C4A5B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebJobUsageDaily", "WebJobUsageDaily\WebJobUsageDaily.csproj", "{5DCAE913-AD73-4FC8-83F8-840A8D84472B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebJobBillingData", "WebJobBillingData\WebJobBillingData.csproj", "{F6C4B811-1A7F-40BC-A9CB-0310EDD2C54B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{F5AD3FDE-3EF1-441B-8146-37B4445E4922}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\HOWTO.md = Documentation\HOWTO.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "imgs", "imgs", "{3E49112E-90F5-465E-8ECB-BCBF0D94D037}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\imgs\img01.png = Documentation\imgs\img01.png
+		Documentation\imgs\img02.png = Documentation\imgs\img02.png
+		Documentation\imgs\img03.png = Documentation\imgs\img03.png
+		Documentation\imgs\img04.png = Documentation\imgs\img04.png
+		Documentation\imgs\img05.png = Documentation\imgs\img05.png
+		Documentation\imgs\img06.png = Documentation\imgs\img06.png
+		Documentation\imgs\img07.png = Documentation\imgs\img07.png
+		Documentation\imgs\img08.png = Documentation\imgs\img08.png
+		Documentation\imgs\img09.png = Documentation\imgs\img09.png
+		Documentation\imgs\img10.png = Documentation\imgs\img10.png
+		Documentation\imgs\img11.png = Documentation\imgs\img11.png
+		Documentation\imgs\img11_1.png = Documentation\imgs\img11_1.png
+		Documentation\imgs\img11_2.png = Documentation\imgs\img11_2.png
+		Documentation\imgs\img11_3.png = Documentation\imgs\img11_3.png
+		Documentation\imgs\img11_4.png = Documentation\imgs\img11_4.png
+		Documentation\imgs\img11_5.png = Documentation\imgs\img11_5.png
+		Documentation\imgs\img11_6.png = Documentation\imgs\img11_6.png
+		Documentation\imgs\img12.png = Documentation\imgs\img12.png
+		Documentation\imgs\img13.png = Documentation\imgs\img13.png
+		Documentation\imgs\img14.png = Documentation\imgs\img14.png
+		Documentation\imgs\img15.png = Documentation\imgs\img15.png
+		Documentation\imgs\img16.png = Documentation\imgs\img16.png
+		Documentation\imgs\img17.png = Documentation\imgs\img17.png
+		Documentation\imgs\img18.png = Documentation\imgs\img18.png
+		Documentation\imgs\img19.png = Documentation\imgs\img19.png
+		Documentation\imgs\img20.png = Documentation\imgs\img20.png
+		Documentation\imgs\img21.png = Documentation\imgs\img21.png
+		Documentation\imgs\img22.png = Documentation\imgs\img22.png
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PowerBI", "PowerBI", "{45EDB498-E2E6-45DE-A40C-A116A8E906DE}"
+	ProjectSection(SolutionItems) = preProject
+		PowerBI\AUIDashboard.pbix = PowerBI\AUIDashboard.pbix
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{A9B7ECDD-2235-4635-9028-C49CF98E79D8}"
+	ProjectSection(SolutionItems) = preProject
+		Scripts\CreateAzureServicesScript.ps1 = Scripts\CreateAzureServicesScript.ps1
+		Scripts\CreateAzureServicesScriptResources.json = Scripts\CreateAzureServicesScriptResources.json
+		Scripts\SqlScripts.sql = Scripts\SqlScripts.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{89999D15-33DF-4F91-BB43-F5457C0B65FB}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{02F2B948-C602-497D-B01A-072B66E8D98D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02F2B948-C602-497D-B01A-072B66E8D98D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02F2B948-C602-497D-B01A-072B66E8D98D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02F2B948-C602-497D-B01A-072B66E8D98D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{361F1A70-5B95-4727-A233-E9820B317EBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{361F1A70-5B95-4727-A233-E9820B317EBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{361F1A70-5B95-4727-A233-E9820B317EBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{361F1A70-5B95-4727-A233-E9820B317EBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BB3471D-F136-4E7B-9E54-91B1688C4A5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BB3471D-F136-4E7B-9E54-91B1688C4A5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BB3471D-F136-4E7B-9E54-91B1688C4A5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BB3471D-F136-4E7B-9E54-91B1688C4A5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DCAE913-AD73-4FC8-83F8-840A8D84472B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DCAE913-AD73-4FC8-83F8-840A8D84472B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DCAE913-AD73-4FC8-83F8-840A8D84472B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DCAE913-AD73-4FC8-83F8-840A8D84472B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6C4B811-1A7F-40BC-A9CB-0310EDD2C54B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6C4B811-1A7F-40BC-A9CB-0310EDD2C54B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6C4B811-1A7F-40BC-A9CB-0310EDD2C54B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6C4B811-1A7F-40BC-A9CB-0310EDD2C54B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3E49112E-90F5-465E-8ECB-BCBF0D94D037} = {F5AD3FDE-3EF1-441B-8146-37B4445E4922}
+	EndGlobalSection
+EndGlobal

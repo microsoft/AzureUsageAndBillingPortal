@@ -1,0 +1,260 @@
+﻿@{
+    ViewBag.Title = "Dashboard";
+}
+
+@if (Model != null)
+{
+    <div class="container" style="margin-top:20px">
+        <div class="panel panel-primary">
+            <div class="panel-heading">Usage report request submission</div>
+            <div class="panel-body">
+
+
+                @using (Html.BeginForm("CreateReport", "Dashboard", null, FormMethod.Post, new { @role = "form" }))
+                {
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <span class="label label-primary col-xs-10">Report Start Date</span>
+                                <br />
+                                <div class="form-group">
+                                    <div class="col-xs-3">
+                                        <label class="control-label" for="sdatemonth">month</label>
+                                        <select class="form-control input-sm" name="sdatemonth" id="sdatemonth">
+                                            @for (int i = 1; i < 13; i++)
+                                            {
+                                                if (i == Model.startDateMonth)
+                                                {
+                                                    <option value="@i.ToString()" selected> @i.ToString() </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@i.ToString()"> @i.ToString() </option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <label class="control-label" for="sdateday">day</label>
+                                        <select class="form-control input-sm" name="sdateday" id="sdateday">
+                                            @for (int i = 1; i < 32; i++)
+                                            {
+                                                if (i == Model.startDateDay)
+                                                {
+                                                    <option value="@i.ToString()" selected> @i.ToString() </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@i.ToString()"> @i.ToString() </option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <label class="control-label" for="sdateyear">year</label>
+                                        <select class="form-control input-sm" name="sdateyear" id="sdateyear">
+                                            @for (int i = 2014; i < 2017; i++)
+                                            {
+                                                if (i == Model.startDateYear)
+                                                {
+                                                    <option value="@i.ToString()" selected> @i.ToString() </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@i.ToString()"> @i.ToString() </option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <br /><br /><br />
+
+                                <span class="label label-primary col-xs-10">Report End Date</span>
+                                <br />
+                                <div class="form-group">
+                                    <div class="col-xs-3">
+                                        <label class="control-label" for="edatemonth">month</label>
+                                        <select class="form-control input-sm" name="edatemonth" id="edatemonth">
+                                            @for (int i = 1; i < 13; i++)
+                                            {
+                                                if (i == Model.endDateMonth)
+                                                {
+                                                    <option value="@i.ToString()" selected> @i.ToString() </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@i.ToString()"> @i.ToString() </option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <label class="control-label" for="edateday">day</label>
+                                        <select class="form-control input-sm" name="edateday" id="edateday">
+                                            @for (int i = 1; i < 32; i++)
+                                            {
+                                                if (i == Model.endDateDay)
+                                                {
+                                                    <option value="@i.ToString()" selected> @i.ToString() </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@i.ToString()"> @i.ToString() </option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <label class="control-label" for="edateyear">year</label>
+                                        <select class="form-control input-sm" name="edateyear" id="edateyear">
+                                            @for (int i = 2014; i < 2017; i++)
+                                            {
+                                                if (i == Model.endDateYear)
+                                                {
+                                                    <option value="@i.ToString()" selected> @i.ToString() </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@i.ToString()"> @i.ToString() </option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <br /><br /><br />
+
+                                <span class="label label-primary col-xs-10">Report Detail Options</span>
+                                <br />
+                                @if (Model.dailyReport == true)
+                                {
+                                    <div class="radio-inline">
+                                        <label><input type="radio" name="period" value="d" id="daily" checked>Daily</label>
+                                    </div>
+                                    <div class="radio-inline">
+                                        <label><input type="radio" name="period" value="h" id="hourly">Hourly</label>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="radio-inline">
+                                        <label><input type="radio" name="period" value="d" id="daily">Daily</label>
+                                    </div>
+                                    <div class="radio-inline">
+                                        <label><input type="radio" name="period" value="h" id="hourly" checked>Hourly</label>
+                                    </div>
+                                }
+
+
+                                @if (Model.detailedReport == true)
+                                {
+                                    <div class="checkbox-inline" style="margin-left:30px">
+                                        <label><input type="checkbox" name="detailed" value="d" id="detailed" checked>Detailed</label>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="checkbox-inline" style="margin-left:30px">
+                                        <label><input type="checkbox" name="detailed" value="d" id="detailed">Detailed</label>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="col-md-6">
+                                <span class="label label-primary col-xs-10">Registered Subscriptions</span>
+                                <br />
+                                <p class="small"> Press and hold <kbd>ctrl</kbd> key to select multiple.</p>
+                                <select multiple class="form-control input-sm" name="subslist" id="subslist" size="10" style="max-width:80%">
+                                    @foreach (KeyValuePair<string, Commons.Subscription> entry in Model.userSubscriptionsList)
+                                    {
+                                        var s = entry.Value as Commons.Subscription;
+                                        if (Model.selectedUserSubscriptions.Contains(s.Id))
+                                        {
+                                            <option selected value="@s.Id">@s.DisplayTag | @s.DisplayName</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@s.Id">@s.DisplayTag | @s.DisplayName</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        <div class="row">
+                            <hr />
+                            <button type="submit" class="btn btn-default">Submit Report Request</button>
+                        </div>
+                    </div>
+                }
+
+
+            </div>
+        </div>
+        <div class="panel panel-info">
+            <div class="panel-heading">List of jobs</div>
+            <div class="panel-body">
+
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Job Status</th>
+                            <th>Report StartDate</th>
+                            <th>Report EndDate</th>
+                            <th>Daily/Hourly</th>
+                            <th>Detailed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (KeyValuePair<string, Commons.ReportRequest> e in Model.repReqsList)
+                        {
+                            var s = e.Value as Commons.ReportRequest;
+                            <tr>
+                                <td>@s.reportDate.ToString()</td>
+                                <td>
+                                    @if (s.url == "")
+                                    {
+                                        <p class="bg-danger">Pending</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="bg-success"> <a href="@s.url"> Complete </a> </p>
+                                    }
+                                </td>
+                                <td>@s.startDate.ToShortDateString()</td>
+                                <td>@s.endDate.ToShortDateString()</td>
+                                <td>
+                                    @if (s.dailyReport)
+                                    {
+                                        <span>Daily</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Hourly</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (s.detailedReport)
+                                    {
+                                        <span>Yes</span>
+                                    }
+                                    else
+                                    {
+                                        <span>No</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+}

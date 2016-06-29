@@ -1,0 +1,231 @@
+﻿@{
+    ViewBag.Title = "Microsoft Azure Subscription Registration for Usage Monitoring";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    @if (!Request.IsAuthenticated)
+    {
+        <div class="row">
+            <p style="margin-bottom:20px" />
+
+            <div class="caption">
+                <ul>
+                    <li class="list-group-item">
+                        <span class="label label-primary">Step 1</span> As you may have cached user credentials, cookies etc. it is strongly recommended to open an InPrivate or Incognito browsing session!
+                    </li>
+                    <li class="list-group-item">
+                        <span class="label label-default">Step 2</span> As you will be redirected to another page, before selecting one of the two login options very below, please read carefully the below guidance for further steps! <br /> Hint: Click on the <b><mark>marked</mark></b> text areas to popup picture guides!
+                    </li>
+                    <li class="list-group-item">
+                        <span class="label label-default">Step 2.2</span>
+                        After selecting one of the two login options below you will be redirected to Microsoft authentication page where you will enter your credentials. At this stage enter your ID (i.e xyz@outlook.com or user@andrew.cmu.edu) that you use to enter Azure management portal. Then grant access right to the usage dashboard application by pressing
+                        <a style="font-size:smaller; cursor:pointer" data-toggle="modal" data-target=".consent-modal-lg"><b><mark>Accept</mark></b></a> button.
+                    </li>
+                    <li class="list-group-item">
+                        <span class="label label-default">Step 3</span>
+                        Then you will be redirected to a page where you can see the list of your Azure subscriptions. Enter your <b>Name Surname</b> into the box near the subscription name and press <a style="font-size:smaller; cursor:pointer" data-toggle="modal" data-target=".allowmonitoring1-modal-lg"><b><mark>Allow Monitoring</mark></b></a> button.
+                    </li>
+                    <li class="list-group-item">
+                        <span class="label label-default">Step 4</span>
+                        Finally after successful registration, you will be redirected <a style="font-size:smaller; cursor:pointer" data-toggle="modal" data-target=".allowmonitoring2-modal-lg"><b><mark>to a page</mark></b></a> with your subscription names that are being monitored for their usage metric.
+                    </li>
+                </ul>
+
+                <br />
+                <h4>Sign-in to connect your Azure Subscription. Select one of the two options below.</h4>
+                <br />
+
+                <div id="org" style="cursor:pointer"><span class="label label-danger">Login option 1</span><a href='@Url.Action("Register", "Home")'><img src="~/Images/org.png" style="height:65px;width:350px;margin:10px" class="img-thumbnail" /></a></div>
+                <span id="back" style="display:none; cursor:pointer" class="glyphicon glyphicon-arrow-left"></span>
+                <div id="msa" style="cursor:pointer"><span class="label label-danger">Login option 2</span><img src="~/Images/msa.png" style="height:65px;width:350px;margin:10px" class="img-thumbnail" /></div>
+                <div id="msadir" style="display: none" class="col-sm-12 col-md-12 col-lg-12 thumbnail">
+                    <ul>
+                        <li class="list-group-item">
+                            <span class="label label-primary">Step 2.1</span>
+                            Enter your Azure subcription's default <b> directory name </b> and click the button "Authenticate" below. <br />
+                            Directory name should be in such format: <b>[XYZ].onmicrosoft.com</b>. It is <b> not an email adress! </b> If you need help to find the <b>[XYZ]</b> part of your directory name, click on the <b><a style="font-size:smaller; cursor:pointer" data-toggle="modal" data-target=".directory-modal-lg"><mark>Help me to find my directory name</mark></a></b> link to see the guidance. After all, press the Authenticate button to continue.
+                        </li>
+                    </ul>
+
+                    <br />
+                    @using (Html.BeginForm("Register", "Home", new { isMSA = true }, FormMethod.Get))
+                    {
+                        <div class="input-group center-block" style="height:65px;width:350px;margin:0px;">
+                            <input name="directoryName" type="text" class="form-control" placeholder="Directory Name e.g. XYZ.onmicrosoft.com" aria-describedby="basic-addon2">
+                            <input name="isMSA" type="hidden" value="true" />
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="submit">Authenticate</button>
+                            </span>
+                            <a style="font-size:smaller; cursor:pointer" data-toggle="modal" data-target=".directory-modal-lg">Help me to find my directory name</a>
+                        </div>
+                    }
+                </div>
+
+            </div>
+
+            <div class="modal fade directory-modal-lg" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class=" modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <img src="~/Images/directory.png" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade consent-modal-lg" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class=" modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <img src="~/Images/consent.png" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade allowmonitoring1-modal-lg" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class=" modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <img src="~/Images/allowmonitoring1.png" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade allowmonitoring2-modal-lg" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class=" modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <img src="~/Images/allowmonitoring2.png" />
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    }
+    else if (Model != null)
+    {
+        <table class="table table-striped table-condensed table-hover">
+            <tr>
+                <td>
+                    <h4>Your Azure Subscription(s)</h4>
+                </td>
+                <td>
+                    <h4>Usage Monitoring Status</h4>
+                </td>
+            </tr>
+            @foreach (KeyValuePair<string, Commons.Subscription> entry in Model.UserSubscriptions)
+            {
+                var subscription = entry.Value as Commons.Subscription;
+            <tr>
+                <td>
+                    @subscription.DisplayName
+                    <br />
+                    <small>Subscription Id: @subscription.Id</small>
+                    <br />
+                    <small>Organization Id: @subscription.OrganizationId</small>
+                </td>
+                <td>
+                    @if (subscription.IsConnected)
+                        {
+                        <text>Yes, monitoring. </text>
+                        <br /><br />
+                        <small>Display name: @subscription.DisplayTag </small>
+                        <br />
+                        <small>Connected By: @subscription.ConnectedBy </small>
+                        <br />
+                        <small>Connected On: @subscription.ConnectedOn.ToShortDateString() </small>
+                        <br />
+                        <br />
+
+                            if (Model.UserCanManageAccessForSubscriptions.Contains(@subscription.Id))
+                            {
+                        @Html.ActionLink("Do not allow Monitoring", "Disconnect", "Home",
+                                    new
+                                    {
+                                        Id = @subscription.Id,
+                                        OrganizationId = @subscription.OrganizationId,
+                                        ServicePrincipalObjectId = Model.UserOrganizations[@subscription.OrganizationId].objectIdOfUsageServicePrincipal
+                                    },
+                                    new { @class = "btn btn-danger btn-xs" })
+
+                        <br />
+                            }
+
+                            if (@subscription.AzureAccessNeedsToBeRepaired)
+                            {
+                        @Html.ActionLink("Repair", "RepairAccess", "Home",
+                                    new
+                                    {
+                                        Id = @subscription.Id,
+                                        OrganizationId = @subscription.OrganizationId,
+                                        ServicePrincipalObjectId = Model.UserOrganizations[@subscription.OrganizationId].objectIdOfUsageServicePrincipal
+                                    },
+                                    new { @class = "btn btn-info btn-xs" })
+                        <small> Access in Azure needs to be repaired!</small>
+
+                        <br />
+                            }
+                        }
+                        else
+                        {
+                        <text>No, not monitoring.</text>                            <br /><br />
+                            if (Model.UserCanManageAccessForSubscriptions.Contains(@subscription.Id))
+                            {
+                                using (Html.BeginForm("Connect", "Home", null, FormMethod.Get, new { @class = "form-horizontal" }))
+                                {
+                        <div class="input-group-sm">
+                            <input name="displayTag" type="text" class="form-control input-sm" placeholder="Display name to associated with your subscription">
+                            <input name="Id" type="hidden" value="@subscription.Id">
+                            <input name="OrganizationId" type="hidden" value="@subscription.OrganizationId">
+                            <input name="DisplayName" type="hidden" value="@subscription.DisplayName">
+                            <input name="ServicePrincipalObjectId" type="hidden" value="@Model.UserOrganizations[@subscription.OrganizationId].objectIdOfUsageServicePrincipal">
+
+                            <small><a href="#" data-toggle="tooltip" title="Instead of your referring your subscriptionID or subscription name, enter an explanatory name to associate with this registration. i.e. Your Name/Surname">Enter a display name and click "Allow Monitoring".</a></small>
+
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary btn-sm" type="submit">Allow Monitoring</button>
+                            </span>
+                        </div>
+                                }
+                            }
+                        }
+
+                    @if (!Model.UserCanManageAccessForSubscriptions.Contains(@subscription.Id))
+                        {
+                        <text>(You can't manage access for this subscription.)</text>
+                        }
+                </td>
+            </tr>
+            }
+        </table>
+        if (Model.DisconnectedUserOrganizations.Count > 0)
+        {
+            <div class="alert alert-warning" role="alert">
+                <h4> Didn't find the Azure subscription that you want to connect? </h4>
+                <h5>
+                    It could be in the @Model.DisconnectedUserOrganizations.Count other Organization(s) of which you're a member.
+                    Click here to connect to all your Organizations (you will need to provide consent for each).
+                </h5>
+            </div>
+        }
+    }
+
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+    $(document).ready(
+     function () {
+         $("#msa").click(function () {
+             $("#org").hide();
+             $("#back").show();
+             $("#msadir").show("slow");
+         });
+         $("#back").click(function () {
+             $("#back").hide();
+             $("#msadir").hide();
+             $("#org").show("slow");
+         });
+         $('[data-toggle="tooltip"]').tooltip();
+     });
+</script>
+
+
+
+
