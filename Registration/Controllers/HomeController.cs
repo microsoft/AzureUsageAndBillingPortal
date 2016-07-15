@@ -54,8 +54,8 @@ namespace Registration.Controllers
                 model.UserCanManageAccessForSubscriptions = new List<string>();
                 model.DisconnectedUserOrganizations = new List<string>();
 
-                var orgnaizations = AzureResourceManagerUtil.GetUserOrganizations();
-                foreach (Organization org in orgnaizations)
+                var organizations = AzureResourceManagerUtil.GetUserOrganizations();
+                foreach (Organization org in organizations)
                 {
                     model.UserOrganizations.Add(org.Id, org);
                     var subscriptions = AzureResourceManagerUtil.GetUserSubscriptions(org.Id);
