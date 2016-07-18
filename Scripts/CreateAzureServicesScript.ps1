@@ -116,7 +116,9 @@ $azureAdApplication1 = New-AzureRmADApplication -DisplayName $displayName1 -Home
 ### 5. Print out the required project settings parameters
 #############################################################################################
 # Get storage account key
-$storageKey = Get-AzureRmStorageAccountKey -Name $StorageAccountName -ResourceGroupName $ResouceGroupName
+$storageKey = Get-AzureRmStorageAccountKey -Name $StorageAccountName -ResourceGroupName $ResourceGroupName
+$storageKey = $storageKey[0].Value
+
 # Get tenant ID
 $tenantID = (Get-AzureRmContext).Tenant.TenantId
 # This value is manually set in AD Application settins. Get that value from the portal, if not set you can set it as your HomePageURL
