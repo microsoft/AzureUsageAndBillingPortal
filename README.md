@@ -25,5 +25,10 @@ The PowerBI dashboard allows users to filter data in realtime according to diffe
 Sample Report screenshot:  
 ![](./Documentation/imgs/img21.png)  
 
+### Enterprise Agreement Accounts
+
+Currently due to limitations of the RateCard API, EA customers will not be able to retrieve their billing data.  This does not stop EA customers from reviewing their usage information and the PowerBI report is still quite valuable for doing this across multiple subscriptions.  The Azure Billing team has stated their plans to work on this support and you can [view the status and vote for the feature here](https://feedback.azure.com/forums/170030-signup-and-billing/suggestions/7662687-show-billing-usage-information-with-ea-subscriptio).
+
+### Code of Conduct
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
