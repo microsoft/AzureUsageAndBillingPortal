@@ -20,6 +20,7 @@ This system consists of the following services:
 
 The PowerBI dashboard allows users to filter data in realtime according to different parameters such as: Subscriptions, Services, SubServices, etc.
 
+##Click for [video tutorial](https://channel9.msdn.com/blogs/Mustafa-Kasap/How-to-Setup-the-Azure-Usage--Billing-Portal) on end to end Setup Instructions
 ##Click for [Setup Instructions](./Documentation/HOWTO.md)
 
 Sample Report screenshot:  
