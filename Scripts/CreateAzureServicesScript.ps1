@@ -27,6 +27,7 @@ $AzureSubscriptionName = "BizSpark"
 $suffix = "v12"
 
 # Azure resource group parameters
+# Application Insights Currently Only Supports Central US Using Anything Else Will Cause The Script To Fail.
 $ResouceGroupName = ("aui-resource-group" + $suffix)
 $ResouceGroupLocation = "Central US"
 
