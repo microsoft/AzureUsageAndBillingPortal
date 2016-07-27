@@ -14,7 +14,7 @@
 # Set the below variables with your own parameters.
 #
 
-### 0. Parameters that will be used to create the resouces. WorkingDir must contain this PS1 and depending Json file
+### 0. Parameters that will be used to create the resources. WorkingDir must contain this PS1 and depending Json file
 $WorkingDir = ".\"
 $TemplateFileName = "CreateAzureServicesScriptResources.json"
 $TemplateFileFullPath = $WorkingDir + $TemplateFileName
@@ -27,17 +27,17 @@ $AzureSubscriptionName = "BizSpark"
 $suffix = "v12"
 
 # Azure resource group parameters
-$ResouceGroupName = ("aui-resource-group" + $suffix)
-$ResouceGroupLocation = "Central US"
+$ResourceGroupName = ("aui-resource-group" + $suffix)
+$ResourceGroupLocation = "Central US"
 
 # Storage account parameters
 $StorageAccountName = ("auistorage" + $suffix)
 $StorageAccountType = "Standard_LRS"
-$StorageAccountLocation = $ResouceGroupLocation
+$StorageAccountLocation = $ResourceGroupLocation
 
 # AzureSQL Server parameters
 $SqlServerName = ("auisqlsr" + $suffix)
-$SqlServerLocation = $ResouceGroupLocation
+$SqlServerLocation = $ResourceGroupLocation
 $SQLServerVersion = "2.0"
 $SqlAdministratorLogin = "mksa"
 $SqlAdministratorLoginPassword = "Password.1%"
@@ -47,7 +47,7 @@ $SqlDatabaseName = ("auisqldb" + $suffix)
 $Web1SiteName = ("auiregistration" + $suffix)
 $Web2SiteName = ("auidashboard" + $suffix)
 $WebHostingPlanName = ("auihostingplan" + $suffix)
-$WebSiteLocation = $ResouceGroupLocation
+$WebSiteLocation = $ResourceGroupLocation
 
 
 ### 1. Login to Azure Resource Manager service. Credentials will be stored under this session for furthure use
@@ -59,8 +59,8 @@ Get-AzureRmSubscription –SubscriptionName $AzureSubscriptionName | Select-Azur
 ### 2. Create a Resource Group. All resources will be created under this group
 #############################################################################################
 $ResourceGroup = @{
-    Name = $ResouceGroupName;
-    Location = $ResouceGroupLocation;
+    Name = $ResourceGroupName;
+    Location = $ResourceGroupLocation;
     Force = $true;
 };
 New-AzureRmResourceGroup @ResourceGroup;
@@ -94,7 +94,7 @@ $ResourceParameters = @{
     webSku = "Basic";
     webWorkerSize = "1";
 };
-New-AzureRmResourceGroupDeployment -ResourceGroupName $ResouceGroupName -TemplateFile $TemplateFileFullPath -TemplateParameterObject $ResourceParameters -Verbose
+New-AzureRmResourceGroupDeployment -ResourceGroupName $ResourceGroupName -TemplateFile $TemplateFileFullPath -TemplateParameterObject $ResourceParameters -Verbose
 
 ### 4. Create Azure Active Directory apps in default directory
 ### MICROSOFT FTE should not use this section to create the AD app under default AD. They need to create
