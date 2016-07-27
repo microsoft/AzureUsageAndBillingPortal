@@ -52,7 +52,7 @@
       "type": "string",
       "allowedValues": [
         "12.0",
-        "2.0",
+        "2.0"
       ],
       "metadata": {
         "description": "The version of the database server."
