@@ -13,7 +13,7 @@
 # You may refer to "How to Setup the Azure Usage & Billing Portal" https://channel9.msdn.com/blogs/Mustafa-Kasap/How-to-Setup-the-Azure-Usage--Billing-Portal video tutorial which shows every single piece of installation steps with the current repo files.
 
 
-### 0. Parameters that will be used to create the resouces. WorkingDir must contain this PS1 and depending Json file
+### 0. Parameters that will be used to create the resources. WorkingDir must contain this PS1 and depending Json file
 $WorkingDir = ".\"
 $TemplateFileName = "CreateAzureServicesScriptResources.json"
 $TemplateFileFullPath = $WorkingDir + $TemplateFileName
