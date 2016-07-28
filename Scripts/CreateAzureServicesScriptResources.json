@@ -22,14 +22,6 @@
     },
     "storageAccountLocation": {
       "type": "string",
-      "allowedValues": [
-        "Central US",
-        "East US",
-        "West US",
-        "West Europe",
-        "East Asia",
-        "Southeast Asia"
-      ],
       "metadata": {
         "description": "Location of storage account"
       }
@@ -577,7 +569,7 @@
       "apiVersion": "2014-04-01",
       "name": "[parameters('web1SiteName')]",
       "type": "Microsoft.Insights/components",
-      "location": "[parameters('webSiteLocation')]",
+      "location": "Central US",
       "dependsOn": [
         "[concat('Microsoft.Web/sites/', parameters('web1SiteName'))]"
       ],
@@ -593,7 +585,7 @@
       "apiVersion": "2014-04-01",
       "name": "[parameters('web2SiteName')]",
       "type": "Microsoft.Insights/components",
-      "location": "[parameters('webSiteLocation')]",
+      "location": "Central US",
       "dependsOn": [
         "[concat('Microsoft.Web/sites/', parameters('web2SiteName'))]"
       ],
