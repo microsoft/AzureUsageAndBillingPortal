@@ -1,18 +1,15 @@
-﻿# Azure Usage Insights Portal
+﻿# Azure Usage and Billing Portal
 #
+# Please read all the comments below. Default values of some variables such as SQL Server password etc. needs update to prevent any security issue.
 #
-# Using powershell version >= 1.0
-# ref: http://blog.kloud.com.au/tag/azure-resource-manager/
-#      https://azure.microsoft.com/en-us/blog/azps-1-0-pre/
-#
-#
-# This script will create an Azure Resource group and WebSite, AzureStorage, AzureSQLDB under it.
+# This script will create an Azure Resource group with WebSite, AzureStorage, AzureSQLDB services under it. It will create basic tier services and dont forget to update parameters to adjust the service tier to a free one (which may create performance issues).
 # Finally it will create an Active Directory Application which needs some manual settings to be done under the Azure clasic (OLD) portal.
-#
 #
 # This script is working together with "resources.json" ARM Template file. Be sure the file exist in the same path or
 # Set the below variables with your own parameters.
 #
+# You may refer to "How to Setup the Azure Usage & Billing Portal" https://channel9.msdn.com/blogs/Mustafa-Kasap/How-to-Setup-the-Azure-Usage--Billing-Portal video tutorial which shows every single piece of installation steps with the current repo files.
+
 
 ### 0. Parameters that will be used to create the resouces. WorkingDir must contain this PS1 and depending Json file
 $WorkingDir = ".\"
@@ -145,9 +142,9 @@ Write-Host ("Data Source=tcp:" + $SqlServerName + ".database.windows.net,1433;In
 Write-Host "ida:TenantId: " -foreground Green –NoNewLine
 Write-Host $tenantID -foreground Red 
 Write-Host "AzureWebJobsDashboard: " -foreground Green –NoNewLine
-Write-Host ("DefaultEndpointsProtocol=https;AccountName=" + $StorageAccountName + ";AccountKey=" + $storageKey.Key1) -foreground Red 
+Write-Host ("DefaultEndpointsProtocol=https;AccountName=" + $StorageAccountName + ";AccountKey=" + $storageKey[0].Value) -foreground Red 
 Write-Host "AzureWebJobsStorage: " -foreground Green –NoNewLine
-Write-Host ("DefaultEndpointsProtocol=https;AccountName=" + $StorageAccountName + ";AccountKey=" + $storageKey.Key1) -foreground Red 
+Write-Host ("DefaultEndpointsProtocol=https;AccountName=" + $StorageAccountName + ";AccountKey=" + $storageKey[0].Value) -foreground Red 
 
 Write-Host ("Some manuel settings to be done!") -foreground Yellow
 
