@@ -1,4 +1,4 @@
-﻿# Azure Usage and Billing Portal
+# Azure Usage and Billing Portal
 #
 # Please read all the comments below. Default values of some variables such as SQL Server password etc. needs update to prevent any security issue.
 #
@@ -7,6 +7,8 @@
 #
 # This script is working together with "resources.json" ARM Template file. Be sure the file exist in the same path or
 # Set the below variables with your own parameters.
+#
+# Before running the script, you should change the current working directory to be same as the script directory
 #
 # You may refer to "How to Setup the Azure Usage & Billing Portal" https://channel9.msdn.com/blogs/Mustafa-Kasap/How-to-Setup-the-Azure-Usage--Billing-Portal video tutorial which shows every single piece of installation steps with the current repo files.
 
@@ -18,23 +20,23 @@ $TemplateFileFullPath = $WorkingDir + $TemplateFileName
 
 # If you have more than one subscription, please specify the name of the subscription that you want to use among them.
 # If you are not sure how many subscriptions you have and want to use the default one, than keep it this parameter as $AzureSubscriptionName = ""
-$AzureSubscriptionName = "BizSpark"
+$AzureSubscriptionName = "Visual Studio Ultimate with MSDN"
 
 # identification / version suffix in service names.
-$suffix = "v12"
+$suffix = "20"
 
 # Azure resource group parameters
-$ResouceGroupName = ("aui-resource-group" + $suffix)
-$ResouceGroupLocation = "Central US"
+$ResourceGroupName = ("aui-resource-group" + $suffix)
+$ResourceGroupLocation = "Central US"
 
 # Storage account parameters
 $StorageAccountName = ("auistorage" + $suffix)
 $StorageAccountType = "Standard_LRS"
-$StorageAccountLocation = $ResouceGroupLocation
+$StorageAccountLocation = $ResourceGroupLocation
 
 # AzureSQL Server parameters
 $SqlServerName = ("auisqlsr" + $suffix)
-$SqlServerLocation = $ResouceGroupLocation
+$SqlServerLocation = $ResourceGroupLocation
 $SQLServerVersion = "2.0"
 $SqlAdministratorLogin = "mksa"
 $SqlAdministratorLoginPassword = "Password.1%"
@@ -44,7 +46,7 @@ $SqlDatabaseName = ("auisqldb" + $suffix)
 $Web1SiteName = ("auiregistration" + $suffix)
 $Web2SiteName = ("auidashboard" + $suffix)
 $WebHostingPlanName = ("auihostingplan" + $suffix)
-$WebSiteLocation = $ResouceGroupLocation
+$WebSiteLocation = $ResourceGroupLocation
 
 
 ### 1. Login to Azure Resource Manager service. Credentials will be stored under this session for furthure use
@@ -56,8 +58,8 @@ Get-AzureRmSubscription –SubscriptionName $AzureSubscriptionName | Select-Azur
 ### 2. Create a Resource Group. All resources will be created under this group
 #############################################################################################
 $ResourceGroup = @{
-    Name = $ResouceGroupName;
-    Location = $ResouceGroupLocation;
+    Name = $ResourceGroupName;
+    Location = $ResourceGroupLocation;
     Force = $true;
 };
 New-AzureRmResourceGroup @ResourceGroup;
@@ -91,7 +93,7 @@ $ResourceParameters = @{
     webSku = "Basic";
     webWorkerSize = "1";
 };
-New-AzureRmResourceGroupDeployment -ResourceGroupName $ResouceGroupName -TemplateFile $TemplateFileFullPath -TemplateParameterObject $ResourceParameters -Verbose
+New-AzureRmResourceGroupDeployment -ResourceGroupName $ResourceGroupName -TemplateFile $TemplateFileFullPath -TemplateParameterObject $ResourceParameters -Verbose
 
 ### 4. Create Azure Active Directory apps in default directory
 ### MICROSOFT FTE should not use this section to create the AD app under default AD. They need to create
@@ -103,7 +105,7 @@ $u2 = ($u -split '@')[1]
 $u3 = ($u2 -split '\.')[0]
 $defaultPrincipal = ($u1 + $u3 + ".onmicrosoft.com")
 
-$displayName1 = "Azure Usage Insights Portal (Registration)"
+$displayName1 = ("Azure Usage Insights Portal (Registration) v" + $suffix)
 $homePageURL1 = ("http://" + $Web1SiteName + ".azurewebsites.net")
 $identifierURI1 = ("http://" + $defaultPrincipal + "/" + $Web1SiteName)
 $passwordADApp = "Password.1%"
@@ -114,7 +116,6 @@ $azureAdApplication1 = New-AzureRmADApplication -DisplayName $displayName1 -Home
 #############################################################################################
 # Get storage account key
 $storageKey = Get-AzureRmStorageAccountKey -Name $StorageAccountName -ResourceGroupName $ResourceGroupName
-$storageKey = $storageKey[0].Value
 
 # Get tenant ID
 $tenantID = (Get-AzureRmContext).Tenant.TenantId
@@ -142,9 +143,9 @@ Write-Host ("Data Source=tcp:" + $SqlServerName + ".database.windows.net,1433;In
 Write-Host "ida:TenantId: " -foreground Green –NoNewLine
 Write-Host $tenantID -foreground Red 
 Write-Host "AzureWebJobsDashboard: " -foreground Green –NoNewLine
-Write-Host ("DefaultEndpointsProtocol=https;AccountName=" + $StorageAccountName + ";AccountKey=" + $storageKey[0].Value) -foreground Red 
+Write-Host ("DefaultEndpointsProtocol=https;AccountName=" + $StorageAccountName + ";AccountKey=" + $storageKey.Key1) -foreground Red 
 Write-Host "AzureWebJobsStorage: " -foreground Green –NoNewLine
-Write-Host ("DefaultEndpointsProtocol=https;AccountName=" + $StorageAccountName + ";AccountKey=" + $storageKey[0].Value) -foreground Red 
+Write-Host ("DefaultEndpointsProtocol=https;AccountName=" + $StorageAccountName + ";AccountKey=" + $storageKey.Key1) -foreground Red 
 
 Write-Host ("Some manuel settings to be done!") -foreground Yellow
 
@@ -158,4 +159,3 @@ Write-Host ("with http and https. Also add http://localhost in case debugging lo
 
 Write-Host ("- Update ProcessQueueMessage function input parameters in WebJob project, functions.cs file to be same as 'ida:QueueBillingDataRequests' param value in webconfig files.") -foreground Yellow
 Write-Host ("- ida:QueueReportRequest & ida:BlobReportPublish parameters in Web.Config (Dashboard) & App.Config(WebJob) files must be same.") -foreground Yellow
-
