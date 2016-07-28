@@ -1,4 +1,4 @@
-# Azure Usage and Billing Portal
+﻿# Azure Usage and Billing Portal
 #
 # Please read all the comments below. Default values of some variables such as SQL Server password etc. needs update to prevent any security issue.
 #
