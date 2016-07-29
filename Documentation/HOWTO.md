@@ -132,11 +132,8 @@ Before publishing you need to update the SQLServer connection parameters. Once y
 - In the PowerBI Desktop, open the file ABIDashboard.pbix and click EditQueries button  
 ![](./imgs/img12.png)  
 
-- In the new window, click “Advanced Editor” and make required Database name, SQL Server password updates etc.  This will link the data in your SQL Server with the PowerBI portal. To access data you have to have executed the SQL script mentioned in the early steps. Once you make the username, password, etc. changes also in *ABIDashboard.pbix* advanced settings, you are ready to publish the dashboard. 
-![](./imgs/img13.png)
-
-- Under "Query Properties" be sure to check "Enable load to report" and "Enable refresh of this query".  
-![](./imgs/img23.png)  
+- In the new window, click “Advanced Editor” and make required Database name, SQL Server password updates etc.  This will link the data in your SQL Server with the PowerBI portal. To access data you have to have executed the SQL script mentioned in the early steps. Once you make the username, password, etc. changes also in *ABIDashboard.pbix* advanced settings, you are ready to publish the dashboard.  
+![](./imgs/img13.png)  
 
 - From File menu, click Publish to Power BI to publish it as online report that you can share with others.
 ![](./imgs/img14.png)  
