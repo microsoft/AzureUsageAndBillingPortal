@@ -35,12 +35,15 @@ $StorageAccountType = "Standard_LRS"
 $StorageAccountLocation = $ResourceGroupLocation
 
 # AzureSQL Server parameters
+# This will create ann AzureSQL Standard S0 instance please review https://azure.microsoft.com/pricing/details/sql-database/ for price details
 $SqlServerName = ("auisqlsr" + $suffix)
 $SqlServerLocation = $ResourceGroupLocation
 $SQLServerVersion = "2.0"
 $SqlAdministratorLogin = "mksa"
 $SqlAdministratorLoginPassword = "Password.1%"
 $SqlDatabaseName = ("auisqldb" + $suffix)
+$sqlEdition = "Standard"
+$sqlRequestedServiceObjectiveName = "S0";
 
 # WebSite parameters
 $Web1SiteName = ("auiregistration" + $suffix)
@@ -81,9 +84,8 @@ $ResourceParameters = @{
     sqlAdministratorLoginPassword = $SqlAdministratorLoginPassword;
     sqlDatabaseName = $SqlDatabaseName;
     sqlCollation = "SQL_Latin1_General_CP1_CI_AS";
-    sqlEdition = "Standard"
-    sqlMaxSizeBytes = "1073741824";
-    sqlRequestedServiceObjectiveName = "S0";
+    sqlEdition = $sqlEdition;
+    sqlRequestedServiceObjectiveName = $sqlRequestedServiceObjectiveName;
 
     # website parameters
     web1SiteName = $Web1SiteName;
