@@ -35,7 +35,7 @@ $StorageAccountType = "Standard_LRS"
 $StorageAccountLocation = $ResourceGroupLocation
 
 # AzureSQL Server parameters
-# This will create ann AzureSQL Standard S0 instance please review https://azure.microsoft.com/pricing/details/sql-database/ for price details
+# This will create an AzureSQL Standard S0 instance please review https://azure.microsoft.com/pricing/details/sql-database/ for price details
 $SqlServerName = ("auisqlsr" + $suffix)
 $SqlServerLocation = $ResourceGroupLocation
 $SQLServerVersion = "2.0"
