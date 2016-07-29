@@ -47,6 +47,7 @@ $Web1SiteName = ("auiregistration" + $suffix)
 $Web2SiteName = ("auidashboard" + $suffix)
 $WebHostingPlanName = ("auihostingplan" + $suffix)
 $WebSiteLocation = $ResourceGroupLocation
+$webSiteInsightsLocation = "Central US"
 
 
 ### 1. Login to Azure Resource Manager service. Credentials will be stored under this session for furthure use
@@ -90,6 +91,7 @@ $ResourceParameters = @{
     web2SiteName = $Web2SiteName;
     webHostingPlanName = $WebHostingPlanName;
     webSiteLocation = $WebSiteLocation;
+    webSiteInsightsLocation = $webSiteInsightsLocation;
     webSku = "Basic";
     webWorkerSize = "1";
 };
