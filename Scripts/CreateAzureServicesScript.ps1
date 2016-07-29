@@ -85,7 +85,8 @@ $ResourceParameters = @{
     sqlDatabaseName = $SqlDatabaseName;
     sqlCollation = "SQL_Latin1_General_CP1_CI_AS";
     sqlEdition = $sqlEdition;
-    sqlRequestedServiceObjectiveName = $sqlRequestedServiceObjectiveName;
+    sqlMaxSizeBytes = "1073741824";
+	sqlRequestedServiceObjectiveName = $sqlRequestedServiceObjectiveName;
 
     # website parameters
     web1SiteName = $Web1SiteName;
