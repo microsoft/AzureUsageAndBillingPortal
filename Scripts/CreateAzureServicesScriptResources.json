@@ -122,6 +122,15 @@
         "description": "The location to use for creating the web app and hosting plan."
       }
     },
+        "webSiteInsightsLocation": {
+        "type": "string",
+        "allowedValues": [
+            "Central US"
+        ],
+        "metadata": {
+            "description": "The location to use for creating the web app application insights."
+        }
+    },
     "webSku": {
       "type": "string",
       "allowedValues": [
@@ -569,7 +578,7 @@
       "apiVersion": "2014-04-01",
       "name": "[parameters('web1SiteName')]",
       "type": "Microsoft.Insights/components",
-      "location": "Central US",
+      "location": "[parameters('webSiteInsightsLocation')]",
       "dependsOn": [
         "[concat('Microsoft.Web/sites/', parameters('web1SiteName'))]"
       ],
@@ -585,7 +594,7 @@
       "apiVersion": "2014-04-01",
       "name": "[parameters('web2SiteName')]",
       "type": "Microsoft.Insights/components",
-      "location": "Central US",
+      "location": "[parameters('webSiteInsightsLocation')]",
       "dependsOn": [
         "[concat('Microsoft.Web/sites/', parameters('web2SiteName'))]"
       ],
