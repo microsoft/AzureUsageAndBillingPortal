@@ -3,12 +3,13 @@
 # Please read all the comments below. Default values of some variables such as SQL Server password etc. needs update to prevent any security issue.
 #
 # This script will create an Azure Resource group with WebSite, AzureStorage, AzureSQLDB services under it. It will create basic tier services and dont forget to update parameters to adjust the service tier to a free one (which may create performance issues).
-# Finally it will create an Active Directory Application which needs some manual settings to be done under the Azure clasic (OLD) portal.
+# Finally it will create an Active Directory (AD) Application which needs some manual settings to be done under the Azure clasic (OLD) portal.
+# !!! Note the AD App name below (defined in the below script params). You have to update the ad app with that name, no other AD apps. !!!
 #
 # This script is working together with "resources.json" ARM Template file. Be sure the file exist in the same path or
 # Set the below variables with your own parameters.
 #
-# Before running the script, you should change the current working directory to be same as the script directory
+# !!! Before running the script, you should change the current working directory to be same as the script directory !!!
 #
 # You may refer to "How to Setup the Azure Usage & Billing Portal" https://channel9.msdn.com/blogs/Mustafa-Kasap/How-to-Setup-the-Azure-Usage--Billing-Portal video tutorial which shows every single piece of installation steps with the current repo files.
 
@@ -22,7 +23,7 @@ $TemplateFileFullPath = $WorkingDir + $TemplateFileName
 # If you are not sure how many subscriptions you have and want to use the default one, than keep it this parameter as $AzureSubscriptionName = ""
 $AzureSubscriptionName = "Visual Studio Ultimate with MSDN"
 
-# identification / version suffix in service names.
+# identification / version suffix in service names. Probably one another user is using this value too. Make it unique! (i.e. with your initials)
 $suffix = "20"
 
 # Azure resource group parameters
@@ -50,7 +51,14 @@ $Web1SiteName = ("auiregistration" + $suffix)
 $Web2SiteName = ("auidashboard" + $suffix)
 $WebHostingPlanName = ("auihostingplan" + $suffix)
 $WebSiteLocation = $ResourceGroupLocation
+# Dont change below parameter. At the time of writing the script, only CentralUS supports Insights service.
 $webSiteInsightsLocation = "Central US"
+
+
+# Active Directory (AD) Application parameters
+# You have to find and update the AD App with below name on the classic portal
+$displayName1 = ("Azure Usage and Billing Portal (Registration) v" + $suffix)
+$passwordADApp = "Password.1%"
 
 
 ### 1. Login to Azure Resource Manager service. Credentials will be stored under this session for furthure use
@@ -110,10 +118,9 @@ $u2 = ($u -split '@')[1]
 $u3 = ($u2 -split '\.')[0]
 $defaultPrincipal = ($u1 + $u3 + ".onmicrosoft.com")
 
-$displayName1 = ("Azure Usage Insights Portal (Registration) v" + $suffix)
+# Create Active Directory Application
 $homePageURL1 = ("http://" + $Web1SiteName + ".azurewebsites.net")
 $identifierURI1 = ("http://" + $defaultPrincipal + "/" + $Web1SiteName)
-$passwordADApp = "Password.1%"
 $azureAdApplication1 = New-AzureRmADApplication -DisplayName $displayName1 -HomePage $homePageURL1 -IdentifierUris $identifierURI1 -Password $passwordADApp
 
 
