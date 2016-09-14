@@ -293,7 +293,15 @@ namespace WebJobBillingData
                         ConfigurationManager.AppSettings["ida:RegionInfo"].ToString());
                     Console.WriteLine("Request cost info from RateCard service.");
                     RateCardPayload rateCardInfo = GetRateCardInfo(rateCardURL, br.OrganizationId);
-                    Console.WriteLine("Received cost info: " + rateCardInfo.ToString());
+                    if (rateCardInfo == null)
+                    {
+                        Console.WriteLine("Problem receiving cost info occured - see log for details.");
+                        continue;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Received cost info: " + rateCardInfo.ToString());
+                    }
 
                     // if granularity=hourly then report up to prev. hour,
                     // if granularity=daily then report up to prev. day. Othervise will get 400 error

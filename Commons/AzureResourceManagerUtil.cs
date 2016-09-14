@@ -36,6 +36,7 @@ using System.Web.Helpers;
 using System.Net;
 using System.Web;
 using System.Text;
+using System.IO;
 
 namespace Commons
 {
@@ -736,6 +737,17 @@ namespace Commons
 
                 response = (HttpWebResponse)request.GetResponse();
             }
+            catch (WebException webExc)
+            {
+                Stream str = webExc.Response.GetResponseStream();
+                using (StreamReader readStream = new StreamReader(str, Encoding.UTF8))
+                {
+                    string content = readStream.ReadToEnd();
+                    Console.WriteLine("Exception: RateCardRestApiCall->e.message: " + webExc.Message);
+                    Console.WriteLine("Response content: " + content);
+                }
+                response = null;
+            }
             catch (Exception e)
             {
                 // Exception occurs because of:
@@ -743,7 +755,7 @@ namespace Commons
                 //      "The remote server returned an error: (403) Forbidden."
                 //      "The remote server returned an error: (400) Bad Request."
                 //      "The remote server returned an error: (404) Not Found."
-                Console.WriteLine("Exception: RateCardRestApiCall1-e.message: {0}", e.Message);
+                Console.WriteLine("Exception: RateCardRestApiCall->e.message: {0}", e.Message);
                 response = null;
             }
 
