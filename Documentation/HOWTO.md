@@ -145,10 +145,10 @@ Before publishing you need to update the SQLServer connection parameters. Once y
 - From the left Queries list, right-click on "AzureUsageRecords" and select "Enabled Load". Then click one the "Close & Apply" button on the top left of the window. You should see a Temporary popup "Apply Query Changes" for few seconds.
  ![](./imgs/img13_4.png) 
 
-- Now the report should show-up but still need few fixes since 3 measures are in Error. Thankfully, it's very simple to fix.
+- Now the report should show-up but still needs few fixes because 3 measures are in Error. Thankfully, it's easy to fix.
  ![](./imgs/img13_5.png) 
 
-- Select the one at the left, it's suppose to show how many subscriptions are selected. Click  The button "New Measure", and type this formula:
+- Select the one at the left, it's supposed to show how many subscriptions are selected. Click the button "New Measure", and type this formula:
  `NumberOfSubscriptions = DISTINCTCOUNT(AzureUsageRecords[DisplayTag])`
  Now a field should be available in the feilds list at the left called "NumberOfSubscriptions" drag & drop it into the fields property of our selected visualization like bellow.
  ![](./imgs/img13_6.png) 
@@ -157,7 +157,7 @@ Before publishing you need to update the SQLServer connection parameters. Once y
   - `MinDate = MIN(AzureUsageRecords[usageStartTime])`
   - `MaxDate = MAX(AzureUsageRecords[usageEndTime])`
 
-- Now you should by ready to publish. From File menu, click "Publish to Power BI" to publish it as online report that you can share with others.
+- Now you should be ready to publish. From File menu, click "Publish to Power BI" to publish it as online report that you can share with others.
  ![](./imgs/img14.png)  
 
 ## How to Register
