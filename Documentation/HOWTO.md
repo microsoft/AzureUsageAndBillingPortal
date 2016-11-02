@@ -123,8 +123,9 @@ You can follow the similar steps publish the webapps above. We prefer to publish
 
 Publishing this webjob on Azure will be the same as the previous webjob.
 
-##PowerBI Report
+## PowerBI Report
 You need to download and install the PowerBI desktop application from https://powerbi.microsoft.com/en-us/desktop. Once you have it, you can open the AUIDashboard.pbix file to modify the existing report and publish it to PowerBI online (you a need PowerBI Online account or can create 1 month trial). When you open the  AUIDashboard.pbix file, initially you will see many errors like "Fix This" as there is no data, as there is no data connection set.
+
 ![](./imgs/img22.png) 
 
 Before publishing you need to update the SQLServer connection parameters. Once you set this connection parameters correctly, you will see something similar or a blank report as below. To make the changes, follow these instructions:  
@@ -132,11 +133,32 @@ Before publishing you need to update the SQLServer connection parameters. Once y
 - In the PowerBI Desktop, open the file ABIDashboard.pbix and click EditQueries button  
 ![](./imgs/img12.png)  
 
-- In the new window, click “Advanced Editor” and make required Database name, SQL Server password updates etc.  This will link the data in your SQL Server with the PowerBI portal. To access data you have to have executed the SQL script mentioned in the early steps. Once you make the username, password, etc. changes also in *ABIDashboard.pbix* advanced settings, you are ready to publish the dashboard.  
-![](./imgs/img13.png)  
+- In the new window, click “Data Source Settings” to make required Database name, SQL Server password updates, etc.
+ ![](./imgs/img13_1.png)  
 
-- From File menu, click Publish to Power BI to publish it as online report that you can share with others.
-![](./imgs/img14.png)  
+- Click on "Change Source...", In this new window you will need to put your Server Name and Database name. You can find these in the PowerShell output inside the connectionstring ASQLConn. Once it's once it's done, click Ok.
+ ![](./imgs/img13_2.png) 
+
+- Next step is to set the credential. Click on "Edit Permissions", then "Edit", and "Database". Now, again from the PowerShell output copy-paste the username and password; by default it was `mksa` and `Password.1%`. Once it done, save and close to get back at Query Editor Windows.
+ ![](./imgs/img13_3.png) 
+
+- From the left Queries list, right-click on "AzureUsageRecords" and select "Enabled Load". Then click one the "Close & Apply" button on the top left of the window. You should see a Temporary popup "Apply Query Changes" for few seconds.
+ ![](./imgs/img13_4.png) 
+
+- Now the report should show-up but still needs few fixes because 3 measures are in Error. Thankfully, it's easy to fix.
+ ![](./imgs/img13_5.png) 
+
+- Select the one at the left, it's supposed to show how many subscriptions are selected. Click the button "New Measure", and type this formula:
+ `NumberOfSubscriptions = DISTINCTCOUNT(AzureUsageRecords[DisplayTag])`
+ Now a field should be available in the feilds list at the left called "NumberOfSubscriptions" drag & drop it into the fields property of our selected visualization like bellow.
+ ![](./imgs/img13_6.png) 
+
+- We need to repeat these steps for the two other errors but using those formulas:
+  - `MinDate = MIN(AzureUsageRecords[usageStartTime])`
+  - `MaxDate = MAX(AzureUsageRecords[usageEndTime])`
+
+- Now you should be ready to publish. From File menu, click "Publish to Power BI" to publish it as online report that you can share with others.
+ ![](./imgs/img14.png)  
 
 ## How to Register
 Once you install and activate a running system, anyone can access the registration website and register their Azure subscription for monitoring.
