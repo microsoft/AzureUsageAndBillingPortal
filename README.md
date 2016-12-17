@@ -23,8 +23,14 @@ The PowerBI dashboard allows users to filter data in realtime according to diffe
 ##Click for [video tutorial](https://channel9.msdn.com/blogs/Mustafa-Kasap/How-to-Setup-the-Azure-Usage--Billing-Portal) on end to end Setup Instructions
 ##Click for [Setup Instructions](./Documentation/HOWTO.md)
 
-Sample Report screenshot:  
+Sample Report screenshot:
 ![](./Documentation/imgs/img21.png)  
+
+### Deploy Azure services
+
+If you have an Azure Account you could also use the following button to use the Azure Template Deployment tool (this will just create the Azure services but won't deploy the web apps, the web jobs nor run the sql script):
+
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathieu-benoit%2FAzureUsageAndBillingPortal%2Fmathieu-benoit%2Fdeploy-to-azure-button%2FScripts%2FCreateAzureServicesScriptResources.json" target="_">![Deploy to Azure](http://azuredeploy.net/deploybutton.png)</a>
 
 ### Enterprise Agreement Accounts
 
