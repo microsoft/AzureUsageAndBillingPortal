@@ -52,7 +52,7 @@ $Web2SiteName = ("auidashboard" + $suffix)
 $WebHostingPlanName = ("auihostingplan" + $suffix)
 $WebSiteLocation = $ResourceGroupLocation
 # Dont change below parameter. At the time of writing the script, only CentralUS supports Insights service.
-$webSiteInsightsLocation = "Central US"
+$webSiteInsightsLocation = "South Central US"
 
 
 # Active Directory (AD) Application parameters
