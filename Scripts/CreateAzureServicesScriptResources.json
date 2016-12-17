@@ -94,13 +94,13 @@
         "description": "The name corresponding to the performance level for edition. The available options are: Shared, Basic, S0, S1, S2, S3, P1, P2, and P3."
       }
     },
-    "web1SiteName": {
+    "registrationWebSiteName": {
       "type": "string",
       "metadata": {
         "description": "The name of the web app that you wish to create."
       }
     },
-    "web2SiteName": {
+    "dashboardWebSiteName": {
       "type": "string",
       "metadata": {
         "description": "The name of the web app that you wish to create."
@@ -205,7 +205,7 @@
     },
     {
       "apiVersion": "2015-08-01",
-      "name": "[parameters('web1SiteName')]",
+      "name": "[parameters('registrationWebSiteName')]",
       "type": "Microsoft.Web/sites",
       "location": "[parameters('webSiteLocation')]",
       "dependsOn": [
@@ -215,7 +215,7 @@
         "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('webHostingPlanName'))]": "empty"
       },
       "properties": {
-        "name": "[parameters('web1SiteName')]",
+        "name": "[parameters('registrationWebSiteName')]",
         "serverFarmId": "[parameters('webHostingPlanName')]",
         "siteConfig": {
           "AlwaysOn": true
@@ -227,7 +227,7 @@
           "type": "config",
           "name": "connectionstrings",
           "dependsOn": [
-            "[concat('Microsoft.Web/sites/', parameters('web1SiteName'))]"
+            "[concat('Microsoft.Web/sites/', parameters('registrationWebSiteName'))]"
           ],
           "properties": {
             "ASQLConn": {
@@ -240,7 +240,7 @@
     },
     {
       "apiVersion": "2015-08-01",
-      "name": "[parameters('web2SiteName')]",
+      "name": "[parameters('dashboardWebSiteName')]",
       "type": "Microsoft.Web/sites",
       "location": "[parameters('webSiteLocation')]",
       "dependsOn": [
@@ -250,7 +250,7 @@
         "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('webHostingPlanName'))]": "empty"
       },
       "properties": {
-        "name": "[parameters('web2SiteName')]",
+        "name": "[parameters('dashboardWebSiteName')]",
         "serverFarmId": "[parameters('webHostingPlanName')]",
         "siteConfig": {
           "AlwaysOn": true
@@ -262,7 +262,7 @@
           "type": "config",
           "name": "connectionstrings",
           "dependsOn": [
-            "[concat('Microsoft.Web/sites/', parameters('web2SiteName'))]"
+            "[concat('Microsoft.Web/sites/', parameters('dashboardWebSiteName'))]"
           ],
           "properties": {
             "ASQLConn": {
@@ -348,24 +348,24 @@
     },
     {
       "apiVersion": "2014-04-01",
-      "name": "[concat('ServerErrors ', parameters('web1SiteName'))]",
+      "name": "[concat('ServerErrors ', parameters('registrationWebSiteName'))]",
       "type": "Microsoft.Insights/alertrules",
       "location": "[parameters('webSiteLocation')]",
       "dependsOn": [
-        "[concat('Microsoft.Web/sites/', parameters('web1SiteName'))]"
+        "[concat('Microsoft.Web/sites/', parameters('registrationWebSiteName'))]"
       ],
       "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('web1SiteName'))]": "Resource"
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('registrationWebSiteName'))]": "Resource"
       },
       "properties": {
-        "name": "[concat('ServerErrors ', parameters('web1SiteName'))]",
-        "description": "[concat(parameters('web1SiteName'), ' has some server errors, status code 5xx.')]",
+        "name": "[concat('ServerErrors ', parameters('registrationWebSiteName'))]",
+        "description": "[concat(parameters('registrationWebSiteName'), ' has some server errors, status code 5xx.')]",
         "isEnabled": false,
         "condition": {
           "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
           "dataSource": {
             "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
-            "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('web1SiteName'))]",
+            "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('registrationWebSiteName'))]",
             "metricName": "Http5xx"
           },
           "operator": "GreaterThan",
@@ -381,24 +381,24 @@
     },
     {
       "apiVersion": "2014-04-01",
-      "name": "[concat('ServerErrors ', parameters('web2SiteName'))]",
+      "name": "[concat('ServerErrors ', parameters('dashboardWebSiteName'))]",
       "type": "Microsoft.Insights/alertrules",
       "location": "[parameters('webSiteLocation')]",
       "dependsOn": [
-        "[concat('Microsoft.Web/sites/', parameters('web2SiteName'))]"
+        "[concat('Microsoft.Web/sites/', parameters('dashboardWebSiteName'))]"
       ],
       "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('web2SiteName'))]": "Resource"
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('dashboardWebSiteName'))]": "Resource"
       },
       "properties": {
-        "name": "[concat('ServerErrors ', parameters('web2SiteName'))]",
-        "description": "[concat(parameters('web2SiteName'), ' has some server errors, status code 5xx.')]",
+        "name": "[concat('ServerErrors ', parameters('dashboardWebSiteName'))]",
+        "description": "[concat(parameters('dashboardWebSiteName'), ' has some server errors, status code 5xx.')]",
         "isEnabled": false,
         "condition": {
           "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
           "dataSource": {
             "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
-            "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('web2SiteName'))]",
+            "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('dashboardWebSiteName'))]",
             "metricName": "Http5xx"
           },
           "operator": "GreaterThan",
@@ -414,24 +414,24 @@
     },
     {
       "apiVersion": "2014-04-01",
-      "name": "[concat('ForbiddenRequests ', parameters('web1SiteName'))]",
+      "name": "[concat('ForbiddenRequests ', parameters('registrationWebSiteName'))]",
       "type": "Microsoft.Insights/alertrules",
       "location": "[parameters('webSiteLocation')]",
       "dependsOn": [
-        "[concat('Microsoft.Web/sites/', parameters('web1SiteName'))]"
+        "[concat('Microsoft.Web/sites/', parameters('registrationWebSiteName'))]"
       ],
       "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('web1SiteName'))]": "Resource"
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('registrationWebSiteName'))]": "Resource"
       },
       "properties": {
-        "name": "[concat('ForbiddenRequests ', parameters('web1SiteName'))]",
-        "description": "[concat(parameters('web1SiteName'), ' has some requests that are forbidden, status code 403.')]",
+        "name": "[concat('ForbiddenRequests ', parameters('registrationWebSiteName'))]",
+        "description": "[concat(parameters('registrationWebSiteName'), ' has some requests that are forbidden, status code 403.')]",
         "isEnabled": false,
         "condition": {
           "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
           "dataSource": {
             "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
-            "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('web1SiteName'))]",
+            "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('registrationWebSiteName'))]",
             "metricName": "Http403"
           },
           "operator": "GreaterThan",
@@ -447,24 +447,24 @@
     },
     {
       "apiVersion": "2014-04-01",
-      "name": "[concat('ForbiddenRequests ', parameters('web2SiteName'))]",
+      "name": "[concat('ForbiddenRequests ', parameters('dashboardWebSiteName'))]",
       "type": "Microsoft.Insights/alertrules",
       "location": "[parameters('webSiteLocation')]",
       "dependsOn": [
-        "[concat('Microsoft.Web/sites/', parameters('web2SiteName'))]"
+        "[concat('Microsoft.Web/sites/', parameters('dashboardWebSiteName'))]"
       ],
       "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('web2SiteName'))]": "Resource"
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('dashboardWebSiteName'))]": "Resource"
       },
       "properties": {
-        "name": "[concat('ForbiddenRequests ', parameters('web2SiteName'))]",
-        "description": "[concat(parameters('web2SiteName'), ' has some requests that are forbidden, status code 403.')]",
+        "name": "[concat('ForbiddenRequests ', parameters('dashboardWebSiteName'))]",
+        "description": "[concat(parameters('dashboardWebSiteName'), ' has some requests that are forbidden, status code 403.')]",
         "isEnabled": false,
         "condition": {
           "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
           "dataSource": {
             "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
-            "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('web2SiteName'))]",
+            "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('dashboardWebSiteName'))]",
             "metricName": "Http403"
           },
           "operator": "GreaterThan",
@@ -546,32 +546,32 @@
     },
     {
       "apiVersion": "2014-04-01",
-      "name": "[parameters('web1SiteName')]",
+      "name": "[parameters('registrationWebSiteName')]",
       "type": "Microsoft.Insights/components",
       "location": "[parameters('webSiteInsightsLocation')]",
       "dependsOn": [
-        "[concat('Microsoft.Web/sites/', parameters('web1SiteName'))]"
+        "[concat('Microsoft.Web/sites/', parameters('registrationWebSiteName'))]"
       ],
       "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('web1SiteName'))]": "Resource"
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('registrationWebSiteName'))]": "Resource"
       },
       "properties": {
-        "ApplicationId": "[parameters('web1SiteName')]"
+        "ApplicationId": "[parameters('registrationWebSiteName')]"
       }
     },
     {
       "apiVersion": "2014-04-01",
-      "name": "[parameters('web2SiteName')]",
+      "name": "[parameters('dashboardWebSiteName')]",
       "type": "Microsoft.Insights/components",
       "location": "[parameters('webSiteInsightsLocation')]",
       "dependsOn": [
-        "[concat('Microsoft.Web/sites/', parameters('web2SiteName'))]"
+        "[concat('Microsoft.Web/sites/', parameters('dashboardWebSiteName'))]"
       ],
       "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('web2SiteName'))]": "Resource"
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('dashboardWebSiteName'))]": "Resource"
       },
       "properties": {
-        "ApplicationId": "[parameters('web2SiteName')]"
+        "ApplicationId": "[parameters('dashboardWebSiteName')]"
       }
     }
   ]
