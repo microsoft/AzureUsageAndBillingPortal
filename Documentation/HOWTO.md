@@ -18,9 +18,9 @@ In case there are any errors during the execution of Powershell script (maybe be
 ![](./imgs/img01.png)  
 *List of services created under “aui-resource-group” by running script “CreateAzureServicesScript.ps1”.*
 
-Note: you could also use the following button to use the Azure Template Deployment tool. This will just create the Azure services but won't deploy the web apps, the web jobs nor run the sql script.
+Note: you could also use the following button to use the Azure Template Deployment tool to deploy the CreateAzureServicesScriptResources.json file. This will just create the Azure services but won't deploy the web apps, the web jobs nor run the sql script.
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathieu-benoit%2FAzureUsageAndBillingPortal%2Fmathieu-benoit%2Fdeploy-to-azure-button%2FScripts%2FCreateAzureServicesScriptResources.json" target="_">![Deploy to Azure](http://azuredeploy.net/deploybutton.png)</a>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2FAzureUsageAndBillingPortal%2Fmaster%2FScripts%2FCreateAzureServicesScriptResources.json" target="_">![Deploy to Azure](http://azuredeploy.net/deploybutton.png)</a>
 
 
 
