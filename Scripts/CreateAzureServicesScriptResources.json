@@ -100,7 +100,8 @@
       }
     },
     "registrationWebSiteName": {
-      "type": "string",      "metadata": {
+      "type": "string",
+      "metadata": {
         "description": "The name of the web app that you wish to create."
       }
     },
@@ -210,7 +211,8 @@
             "[concat('Microsoft.Sql/servers/', parameters('sqlServerName'))]"
           ],
           "location": "[parameters('sqlServerLocation')]",
-          "name": "AllowAllWindowsAzureIps",          "properties": {
+          "name": "AllowAllWindowsAzureIps",
+          "properties": {
             "endIpAddress": "0.0.0.0",
             "startIpAddress": "0.0.0.0"
           },
