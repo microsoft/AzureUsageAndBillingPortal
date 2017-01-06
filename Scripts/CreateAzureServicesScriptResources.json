@@ -161,13 +161,13 @@
       }
     }
   },
-  "variables":{
+  "variables": {
     "alwaysOn": {
-      "Free": "false", 
-      "Shared": "false", 
-      "Basic": "true", 
-      "Standard": "true"
-    }
+      "Free": "false",
+      "Shared": "false",
+      "Basic": "true",
+      "Standard": "true"
+    }
   },
   "resources": [
     {
@@ -204,6 +204,19 @@
             "maxSizeBytes": "[parameters('sqlMaxSizeBytes')]",
             "requestedServiceObjectiveName": "[parameters('sqlRequestedServiceObjectiveName')]"
           }
+        },
+        {
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[concat('Microsoft.Sql/servers/', parameters('sqlServerName'))]"
+          ],
+          "location": "[parameters('sqlServerLocation')]",
+          "name": "AllowAllWindowsAzureIps",
+          "properties": {
+            "endIpAddress": "0.0.0.0",
+            "startIpAddress": "0.0.0.0"
+          },
+          "type": "firewallrules"
         }
       ]
     },
