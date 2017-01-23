@@ -23,7 +23,7 @@ The PowerBI dashboard allows users to filter data in realtime according to diffe
 ##Click for [video tutorial](https://channel9.msdn.com/blogs/Mustafa-Kasap/How-to-Setup-the-Azure-Usage--Billing-Portal) on end to end Setup Instructions
 ##Click for [Setup Instructions](./Documentation/HOWTO.md)
 
-Sample Report screenshot:  
+Sample Report screenshot:
 ![](./Documentation/imgs/img21.png)  
 
 ### Enterprise Agreement Accounts
