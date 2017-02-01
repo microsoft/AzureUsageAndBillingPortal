@@ -96,8 +96,8 @@ $ResourceParameters = @{
 	sqlRequestedServiceObjectiveName = $sqlRequestedServiceObjectiveName;
 
     # website parameters
-    web1SiteName = $Web1SiteName;
-    web2SiteName = $Web2SiteName;
+    registrationWebSiteName = $Web1SiteName;
+    dashboardWebSiteName = $Web2SiteName;
     webHostingPlanName = $WebHostingPlanName;
     webSiteLocation = $WebSiteLocation;
     webSiteInsightsLocation = $webSiteInsightsLocation;
