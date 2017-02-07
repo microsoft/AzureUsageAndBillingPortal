@@ -153,9 +153,9 @@ Write-Host ("Data Source=tcp:" + $SqlServerName + ".database.windows.net,1433;In
 Write-Host "ida:TenantId: " -foreground Green –NoNewLine
 Write-Host $tenantID -foreground Red 
 Write-Host "AzureWebJobsDashboard: " -foreground Green –NoNewLine
-Write-Host ("DefaultEndpointsProtocol=https;AccountName=" + $StorageAccountName + ";AccountKey=" + $storageKey.Key1) -foreground Red 
+Write-Host ("DefaultEndpointsProtocol=https;AccountName=" + $StorageAccountName + ";AccountKey=" + $storageKey[0].Value) -foreground Red 
 Write-Host "AzureWebJobsStorage: " -foreground Green –NoNewLine
-Write-Host ("DefaultEndpointsProtocol=https;AccountName=" + $StorageAccountName + ";AccountKey=" + $storageKey.Key1) -foreground Red 
+Write-Host ("DefaultEndpointsProtocol=https;AccountName=" + $StorageAccountName + ";AccountKey=" + $storageKey[0].Value) -foreground Red 
 
 Write-Host ("Some manuel settings to be done!") -foreground Yellow
 
