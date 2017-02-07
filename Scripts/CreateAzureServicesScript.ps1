@@ -39,7 +39,7 @@ $StorageAccountLocation = $ResourceGroupLocation
 # This will create an AzureSQL Standard S0 instance please review https://azure.microsoft.com/pricing/details/sql-database/ for price details
 $SqlServerName = ("auisqlsr" + $suffix)
 $SqlServerLocation = $ResourceGroupLocation
-$SQLServerVersion = "2.0"
+$SQLServerVersion = "v12.0"
 $SqlAdministratorLogin = "mksa"
 $SqlAdministratorLoginPassword = "Password.1%"
 $SqlDatabaseName = ("auisqldb" + $suffix)
