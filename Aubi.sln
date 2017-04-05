@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registration", "Registration\Registration.csproj", "{02F2B948-C602-497D-B01A-072B66E8D98D}"
 EndProject
@@ -52,7 +52,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "imgs", "imgs", "{3E49112E-9
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PowerBI", "PowerBI", "{45EDB498-E2E6-45DE-A40C-A116A8E906DE}"
 	ProjectSection(SolutionItems) = preProject
-		PowerBI\AUIDashboard.pbix = PowerBI\AUIDashboard.pbix
+		PowerBI\AubiDashboard.pbix = PowerBI\AubiDashboard.pbix
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{A9B7ECDD-2235-4635-9028-C49CF98E79D8}"

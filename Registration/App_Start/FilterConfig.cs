@@ -1,5 +1,5 @@
 ﻿//------------------------------------------ START OF LICENSE -----------------------------------------
-//Azure Usage Insights Portal
+//Azure Usage and Billing Insights
 //
 //Copyright(c) Microsoft Corporation
 //
@@ -29,9 +29,9 @@ namespace Registration
 {
     public class FilterConfig
     {
-        public static void RegisterGlobalFilters(GlobalFilterCollection filters)
-        {
-            filters.Add(new HandleErrorAttribute());
-        }
-    }
+		public static void RegisterGlobalFilters(GlobalFilterCollection filters)
+		{
+			filters.Add(new ErrorHandler.AiHandleErrorAttribute());
+		}
+	}
 }

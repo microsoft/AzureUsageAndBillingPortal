@@ -1,4 +1,4 @@
-﻿# Azure Usage and Billing Portal
+﻿# Azure Usage and Billing Insights
 #
 # Please read all the comments below. Default values of some variables such as SQL Server password etc. needs update to prevent any security issue.
 #
@@ -55,7 +55,7 @@ $webSiteInsightsLocation = "South Central US"
 
 # Active Directory (AD) Application parameters
 # You have to find and update the AD App with below name on the classic portal
-$displayName1 = ("Azure Usage and Billing Portal (Registration) v" + $suffix)
+$displayName1 = ("Azure Usage and Billing Insights - Registration v" + $suffix)
 $passwordADApp = "Password.1%"
 
 

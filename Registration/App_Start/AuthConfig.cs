@@ -1,5 +1,5 @@
 ﻿//------------------------------------------ START OF LICENSE -----------------------------------------
-//Azure Usage Insights Portal
+//Azure Usage and Billing Insights
 //
 //Copyright(c) Microsoft Corporation
 //
@@ -40,110 +40,107 @@ using Commons;
 
 namespace Registration
 {
-    public partial class OwinStartup
-    {
-        public void ConfigureAuth(IAppBuilder app)
-        {
-            string ClientId = ConfigurationManager.AppSettings["ida:ClientID"];
-            string Password = ConfigurationManager.AppSettings["ida:Password"];
-            string Authority = string.Format(ConfigurationManager.AppSettings["ida:Authority"], "common");
-            string GraphAPIIdentifier = ConfigurationManager.AppSettings["ida:GraphAPIIdentifier"];
+	public partial class OwinStartup
+	{
+		private static readonly string ClientId = ConfigurationManager.AppSettings["ida:ClientId"];
+		private static readonly string Password = ConfigurationManager.AppSettings["ida:Password"];
+		private static readonly string Authority = String.Format(ConfigurationManager.AppSettings["ida:Authority"], "common");
+		private static readonly string GraphApiIdentifier = ConfigurationManager.AppSettings["ida:GraphApiIdentifier"];
+		private static readonly string AzureResourceManagerIdentifier = ConfigurationManager.AppSettings["ida:AzureResourceManagerIdentifier"];
 
-            app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
-            app.UseCookieAuthentication(new CookieAuthenticationOptions { });
-            app.UseOpenIdConnectAuthentication(
-                new OpenIdConnectAuthenticationOptions
-                {
-                    ClientId = ClientId,
-                    Authority = Authority,
-                    TokenValidationParameters = new System.IdentityModel.Tokens.TokenValidationParameters
-                    {
-                        // we inject our own multitenant validation logic
-                        ValidateIssuer = false,
-                    },
-                    Notifications = new OpenIdConnectAuthenticationNotifications()
-                    {
-                        RedirectToIdentityProvider = (context) =>
-                        {
-                            // This ensures that the address used for sign in and sign out is picked up dynamically from the request
-                            // this allows you to deploy your app (to Azure Web Sites, for example) without having to change settings
-                            // Remember that the base URL of the address used here must be provisioned in Azure AD beforehand.
-                            //string appBaseUrl = context.Request.Scheme + "://" + context.Request.Host + context.Request.PathBase;
+		public void ConfigureAuth(IAppBuilder app)
+		{
+			app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
+			app.UseCookieAuthentication(new CookieAuthenticationOptions { });
+			app.UseOpenIdConnectAuthentication(
+				new OpenIdConnectAuthenticationOptions
+				{
+					ClientId = ClientId,
+					Authority = Authority,
+					TokenValidationParameters = new System.IdentityModel.Tokens.TokenValidationParameters
+					{
+						// we inject our own multitenant validation logic
+						ValidateIssuer = false,
+					},
+					Notifications = new OpenIdConnectAuthenticationNotifications()
+					{
+						RedirectToIdentityProvider = (context) =>
+						{
+							// This ensures that the address used for sign in and sign out is picked up dynamically from the request
+							// this allows you to deploy your app (to Azure Web Sites, for example) without having to change settings
+							// Remember that the base URL of the address used here must be provisioned in Azure AD beforehand.
+							//string appBaseUrl = context.Request.Scheme + "://" + context.Request.Host + context.Request.PathBase;
 
-                            object obj = null;
-                            if (context.OwinContext.Environment.TryGetValue("Authority", out obj))
-                            {
-                                string authority = obj as string;
-                                if (authority != null)
-                                {
-                                    context.ProtocolMessage.IssuerAddress = authority;
-                                }
-                            }
-                            if (context.OwinContext.Environment.TryGetValue("DomainHint", out obj))
-                            {
-                                string domainHint = obj as string;
-                                if (domainHint != null)
-                                {
-                                    context.ProtocolMessage.SetParameter("domain_hint", domainHint);
-                                }
-                            }
-                            context.ProtocolMessage.RedirectUri = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path);
-                            context.ProtocolMessage.PostLogoutRedirectUri = new UrlHelper(HttpContext.Current.Request.RequestContext).Action("Index", "Home", null, HttpContext.Current.Request.Url.Scheme);
-                            context.ProtocolMessage.Resource = GraphAPIIdentifier;
-                            return Task.FromResult(0);
-                        },
-                        AuthorizationCodeReceived = (context) =>
-                        {
-                            ClientCredential credential = new ClientCredential(ClientId, Password);
-                            string tenantID = context.AuthenticationTicket.Identity.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value;
-                            string signedInUserUniqueName = context.AuthenticationTicket.Identity.FindFirst(ClaimTypes.Name).Value.Split('#')[context.AuthenticationTicket.Identity.FindFirst(ClaimTypes.Name).Value.Split('#').Length - 1];
+							object obj = null;
+							if (context.OwinContext.Environment.TryGetValue("Authority", out obj)) {
+								string authority = obj as string;
+								if (authority != null) {
+									context.ProtocolMessage.IssuerAddress = authority;
+								}
+							}
+							if (context.OwinContext.Environment.TryGetValue("DomainHint", out obj)) {
+								string domainHint = obj as string;
+								if (domainHint != null) {
+									context.ProtocolMessage.SetParameter("domain_hint", domainHint);
+								}
+							}
+							context.ProtocolMessage.RedirectUri = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path);
+							context.ProtocolMessage.PostLogoutRedirectUri = new UrlHelper(HttpContext.Current.Request.RequestContext).Action("Index", "Home", null, HttpContext.Current.Request.Url.Scheme);
+							context.ProtocolMessage.Resource = GraphApiIdentifier;
+							return Task.FromResult(0);
+						},
+						AuthorizationCodeReceived = (context) =>
+						{
+							ClientCredential credential = new ClientCredential(ClientId, Password);
+							string tenantID = context.AuthenticationTicket.Identity.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value;
+							string signedInUserUniqueName = context.AuthenticationTicket.Identity.FindFirst(ClaimTypes.Name).Value.Split('#')[context.AuthenticationTicket.Identity.FindFirst(ClaimTypes.Name).Value.Split('#').Length - 1];
 
-                            ADALTokenCache cache = new ADALTokenCache(signedInUserUniqueName);
+							AdalTokenCache cache = new AdalTokenCache(signedInUserUniqueName);
 
-                            cache.Clear();
+							cache.Clear();
 
-                            AuthenticationContext authContext = new AuthenticationContext(
-                                                                        string.Format("https://login.microsoftonline.com/{0}", tenantID),
-                                                                        new ADALTokenCache(signedInUserUniqueName));
+							AuthenticationContext authContext = new AuthenticationContext(
+								String.Format("https://login.microsoftonline.com/{0}", tenantID),
+								new AdalTokenCache(signedInUserUniqueName));
 
-                            var items = authContext.TokenCache.ReadItems().ToList();
+							var items = authContext.TokenCache.ReadItems().ToList();
 
-                            AuthenticationResult result1 = authContext.AcquireTokenByAuthorizationCode(
-                                                                                context.Code,
-                                                                                new Uri(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path)),
-                                                                                credential);
+							AuthenticationResult result1 = authContext.AcquireTokenByAuthorizationCodeAsync(
+								context.Code,
+								new Uri(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path)),
+								credential).GetAwaiter().GetResult();
 
-                            items = authContext.TokenCache.ReadItems().ToList();
+							items = authContext.TokenCache.ReadItems().ToList();
 
-                            AuthenticationResult result2 = authContext.AcquireTokenSilent(
-                                                                            ConfigurationManager.AppSettings["ida:AzureResourceManagerIdentifier"],
-                                                                            credential,
-                                                                            new UserIdentifier(signedInUserUniqueName, UserIdentifierType.RequiredDisplayableId));
+							AuthenticationResult result2 = authContext.AcquireTokenSilentAsync(
+								AzureResourceManagerIdentifier,
+								credential,
+								new UserIdentifier(signedInUserUniqueName, UserIdentifierType.RequiredDisplayableId)).GetAwaiter().GetResult();
 
-                            items = authContext.TokenCache.ReadItems().ToList();
+							items = authContext.TokenCache.ReadItems().ToList();
 
-                            return Task.FromResult(0);
-                        },
-                        // we use this notification for injecting our custom logic
-                        SecurityTokenValidated = (context) =>
-                    {
-                        // retriever caller data from the incoming principal
-                        string issuer = context.AuthenticationTicket.Identity.FindFirst("iss").Value;
-                        if (!issuer.StartsWith("https://sts.windows.net/"))
-                            // the caller is not from a trusted issuer - throw to block the authentication flow
-                            throw new System.IdentityModel.Tokens.SecurityTokenValidationException();
+							return Task.FromResult(0);
+						},
+						// we use this notification for injecting our custom logic
+						SecurityTokenValidated = (context) =>
+					{
+						// retriever caller data from the incoming principal
+						string issuer = context.AuthenticationTicket.Identity.FindFirst("iss").Value;
+						if (!issuer.StartsWith("https://sts.windows.net/"))
+							// the caller is not from a trusted issuer - throw to block the authentication flow
+							throw new System.IdentityModel.Tokens.SecurityTokenValidationException();
 
-                        return Task.FromResult(0);
-                    },
-                        AuthenticationFailed = (context) =>
-                        {
-                            context.OwinContext.Response.Redirect(new UrlHelper(HttpContext.Current.Request.RequestContext).
-                                Action("Error", "Home", new { ExceptionDetails = context.Exception.Message }, HttpContext.Current.Request.Url.Scheme));
-                            context.HandleResponse(); // Suppress the exception
-                            return Task.FromResult(0);
-                        }
-                    }
-                });
-        }
-    }
+						return Task.FromResult(0);
+					},
+						AuthenticationFailed = (context) =>
+						{
+							context.OwinContext.Response.Redirect(new UrlHelper(HttpContext.Current.Request.RequestContext).
+								Action("Error", "Home", new { ExceptionDetails = context.Exception.Message }, HttpContext.Current.Request.Url.Scheme));
+							context.HandleResponse(); // Suppress the exception
+							return Task.FromResult(0);
+						}
+					}
+				});
+		}
+	}
 }

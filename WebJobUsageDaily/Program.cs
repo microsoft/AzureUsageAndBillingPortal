@@ -1,5 +1,5 @@
 ﻿//------------------------------------------ START OF LICENSE -----------------------------------------
-//Azure Usage Insights Portal
+//Azure Usage and Billing Insights
 //
 //Copyright(c) Microsoft Corporation
 //
@@ -22,54 +22,34 @@
 //OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 //CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //----------------------------------------------- END OF LICENSE ------------------------------------------
-using Commons;
-using System.Configuration; // access to configuration files
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Queue;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 
+using Microsoft.Azure.WebJobs;
+using System;
+using System.Diagnostics;
 
 namespace WebJobUsageDaily
 {
-    // To learn more about Microsoft Azure WebJobs SDK, please see http://go.microsoft.com/fwlink/?LinkID=320976
-    class Program
-    {
-        static void Main()
-        {
-            Console.WriteLine("*************************************************************************");
-            Console.WriteLine("WebJobUsageDaily:Main starting. DateTimeUTC: {0}", DateTime.UtcNow);
+	// To learn more about Microsoft Azure WebJobs SDK, please see http://go.microsoft.com/fwlink/?LinkID=320976
+	class Program
+	{
+		static void Main()
+		{
+			if (Environment.UserInteractive) {
+				// test only - enqueue last 10 days only
+				Functions.ClearQueue();
+				Functions.EnqueueBillingDownload(DateTime.UtcNow.Date.AddDays(-10), DateTime.UtcNow.Date);
+				Console.WriteLine("Press any key");
+				Console.ReadLine();
+			} else {
+				Trace.TraceInformation("*************************************************************************");
+				Trace.TraceInformation($"{nameof(WebJobUsageDaily)}:{nameof(Main)} starting. DateTime UTC: {DateTime.UtcNow}");
 
-            List<Subscription> abis = Commons.Utils.GetSubscriptions();
+				JobHostConfiguration config = new JobHostConfiguration();
+				config.UseTimers();
 
-            foreach (Subscription s in abis)
-            {
-                //Commons.Utils.UpdateSubscriptionStatus(s.Id, DataGenStatus.Pending, DateTime.UtcNow.AddYears(-3));
-                try
-                {
-                    //DateTime sdt = DateTime.Now.AddYears(-3);
-                    DateTime sdt = DateTime.Now.AddDays(-2);
-                    DateTime edt = DateTime.Now;
-                    BillingRequest br = new BillingRequest(s.Id, s.OrganizationId, sdt, edt);
-
-                    // Insert into Azure Storage Queue
-                    var storageAccount = CloudStorageAccount.Parse(ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ToString());
-                    CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
-                    CloudQueue subscriptionsQueue = queueClient.GetQueueReference(ConfigurationManager.AppSettings["ida:QueueBillingDataRequests"].ToString());
-                    subscriptionsQueue.CreateIfNotExists();
-                    var queueMessage = new CloudQueueMessage(JsonConvert.SerializeObject(br));
-                    subscriptionsQueue.AddMessageAsync(queueMessage);
-                    Console.WriteLine(String.Format("Sent id for daily billing log: {0}", s.Id));
-
-                    Commons.Utils.UpdateSubscriptionStatus(s.Id, DataGenStatus.Pending, DateTime.UtcNow);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("WebJobUsageDaily - SendQueue: " + e.Message);
-                }
-            } // foreach
-
-        }
-    }
+				JobHost host = new JobHost(config);
+				host.RunAndBlock();
+			}
+		}
+	}
 }

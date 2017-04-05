@@ -1,5 +1,5 @@
 ﻿//------------------------------------------ START OF LICENSE -----------------------------------------
-//Azure Usage Insights Portal
+//Azure Usage and Billing Insights
 //
 //Copyright(c) Microsoft Corporation
 //
@@ -24,15 +24,15 @@
 //----------------------------------------------- END OF LICENSE ------------------------------------------
 using System.Collections.Generic;
 using Commons;
+using System;
 
 namespace Registration.Models
 {
-    public class HomeIndexViewModel
-    {
-        public Dictionary<string, Organization> UserOrganizations { get; set; }
-        public Dictionary<string, Subscription> UserSubscriptions { get; set; }
-        public List<string> UserCanManageAccessForSubscriptions { get; set; }
-        public List<string> DisconnectedUserOrganizations { get; set; }
-    }
-
+	public class HomeIndexViewModel
+	{
+		public Dictionary<Guid, Organization> UserOrganizations { get; set; }
+		public Dictionary<Guid, Subscription> UserSubscriptions { get; set; }
+		public List<Guid> UserCanManageAccessForSubscriptions { get; set; }
+		public List<Guid> DisconnectedUserOrganizations { get; set; }
+	}
 }

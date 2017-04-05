@@ -1,5 +1,5 @@
 ﻿//------------------------------------------ START OF LICENSE -----------------------------------------
-//Azure Usage Insights Portal
+//Azure Usage and Billing Insights
 //
 //Copyright(c) Microsoft Corporation
 //
@@ -22,318 +22,304 @@
 //OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 //CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //----------------------------------------------- END OF LICENSE ------------------------------------------
+
+using Commons;
+using Microsoft.Azure.WebJobs;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using Microsoft.Azure.WebJobs;
-
-using System.Threading;
 using System.Configuration;
-using Commons;
-using System.Data.SqlClient;
-using System.Net;
-using Newtonsoft.Json;
 using System.Data;
+using System.Data.SqlClient;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
-
+using System.Net;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace WebJobBillingData
 {
-    public class Functions
-    {
-        private static void CheckParameters(SqlParameterCollection sqlpc)
-        {
-            foreach (SqlParameter p in sqlpc)
-            {
-                if (p.Value == null)
-                    if (p.SqlDbType == SqlDbType.NVarChar)
-                        p.Value = "";
-                    else
-                        p.Value = DBNull.Value;
-            }
-        }
+	public static class Functions
+	{
+		private static readonly string OfferCode = ConfigurationManager.AppSettings["ida:OfferCode"];
+		private static readonly string Currency = ConfigurationManager.AppSettings["ida:Currency"];
+		private static readonly string Locale = ConfigurationManager.AppSettings["ida:Locale"];
+		private static readonly string RegionInfo = ConfigurationManager.AppSettings["ida:RegionInfo"];
+		private static readonly string RetryCountToProcessMessage = ConfigurationManager.AppSettings["ida:RetryCountToProcessMessage"];
+		private static readonly string SqlConnectionString = ConfigurationManager.ConnectionStrings["SqlConnection"]?.ConnectionString;
 
-        public static void InsertIntoSQLDB(List<UsageRecord> urs)
-        {
-            string connectionString = ConfigurationManager.ConnectionStrings["ASQLConn"].ToString();
-            SqlConnection connection = new SqlConnection(connectionString);
-            try
-            {
-                connection.Open();
+		public static void ProcessQueueMessage([QueueTrigger("billingdatarequests")] BillingRequest billingRequest, TextWriter logWriter = null)
+		{
+			if (logWriter != null) {
+				TextWriterTraceListener traceListener = new TextWriterTraceListener(logWriter, "LogWriter");
+				Trace.Listeners.Remove("LogWriter");
+				Trace.Listeners.Add(traceListener);
+				Trace.TraceInformation("Azure WebJob Log Writer configured");
+			}
 
-                SqlCommand sqlCommand = new SqlCommand("InsertUsageRecord", connection);
-                sqlCommand.CommandType = CommandType.StoredProcedure;
+			Trace.TraceInformation($"WebJob process started. {nameof(billingRequest.SubscriptionId)}: {billingRequest.SubscriptionId}");
+			int retriesLeft = Convert.ToInt32(RetryCountToProcessMessage);
+			Exception lastException = null;
 
-                List<SqlParameter> sqlParameters = new List<SqlParameter>();
-                sqlParameters.Add(new SqlParameter("@uid", SqlDbType.UniqueIdentifier));
-                sqlParameters.Add(new SqlParameter("@id", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@name", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@type", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@subscriptionId", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@usageStartTime", SqlDbType.DateTime));
-                sqlParameters.Add(new SqlParameter("@usageEndTime", SqlDbType.DateTime));
-                sqlParameters.Add(new SqlParameter("@meterId", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@meteredRegion", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@meteredService", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@project", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@meteredServiceType", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@serviceInfo1", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@instanceDataRaw", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@resourceUri", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@location", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@partNumber", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@orderNumber", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@quantity", SqlDbType.Float));
-                sqlParameters.Add(new SqlParameter("@unit", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@meterName", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@meterCategory", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@meterSubCategory", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@meterRegion", SqlDbType.NVarChar));
-                sqlParameters.Add(new SqlParameter("@cost", SqlDbType.Decimal));
-                sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+			while (retriesLeft > 0) {
+				--retriesLeft;
 
-                foreach (UsageRecord ur in urs)
-                {
-                    // check param/value validity
-                    sqlCommand.Parameters["@uid"].Value = ur.uid;
-                    sqlCommand.Parameters["@id"].Value = ur.id;
-                    sqlCommand.Parameters["@name"].Value = ur.name;
-                    sqlCommand.Parameters["@type"].Value = ur.type;
-                    sqlCommand.Parameters["@subscriptionId"].Value = ur.subscriptionId;
-                    sqlCommand.Parameters["@usageStartTime"].Value = Convert.ToDateTime(ur.usageStartTime).ToUniversalTime();
-                    sqlCommand.Parameters["@usageEndTime"].Value = Convert.ToDateTime(ur.usageEndTime).ToUniversalTime();
-                    sqlCommand.Parameters["@meterId"].Value = ur.meterId;
-                    sqlCommand.Parameters["@meteredRegion"].Value = ur.meteredRegion;
-                    sqlCommand.Parameters["@meteredService"].Value = ur.meteredService;
-                    sqlCommand.Parameters["@project"].Value = ur.project;
-                    sqlCommand.Parameters["@meteredServiceType"].Value = ur.meteredServiceType;
-                    sqlCommand.Parameters["@serviceInfo1"].Value = ur.serviceInfo1;
-                    sqlCommand.Parameters["@instanceDataRaw"].Value = ur.instanceDataRaw;
-                    sqlCommand.Parameters["@resourceUri"].Value = ur.resourceUri;
-                    sqlCommand.Parameters["@location"].Value = ur.location;
-                    sqlCommand.Parameters["@partNumber"].Value = ur.partNumber;
-                    sqlCommand.Parameters["@orderNumber"].Value = ur.orderNumber;
-                    sqlCommand.Parameters["@quantity"].Value = ur.quantity;
-                    sqlCommand.Parameters["@unit"].Value = ur.unit;
-                    sqlCommand.Parameters["@meterName"].Value = ur.meterName;
-                    sqlCommand.Parameters["@meterCategory"].Value = ur.meterCategory;
-                    sqlCommand.Parameters["@meterSubCategory"].Value = ur.meterSubCategory;
-                    sqlCommand.Parameters["@meterRegion"].Value = ur.meterRegion;
-                    sqlCommand.Parameters["@cost"].Value = ur.cost;
+				if (retriesLeft < 1) {
+					Trace.TraceInformation($"Finished internal retries, time:{DateTime.UtcNow}");
 
-                    CheckParameters(sqlCommand.Parameters);
+					if (lastException != null) {
+						throw lastException;
+					} else {
+						return;
+					}
+				}
 
-                    try  // to catch duplicate inserts...
-                    {
-                        sqlCommand.ExecuteNonQuery();
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("Exception: Possible Dublicate! InsertIntoSQLDB->e.Message: " + e.Message);
-                    }
-                }
+				Trace.TraceInformation($"Start time:{DateTime.UtcNow}, retries Left: {retriesLeft}");
 
-                connection.Close();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Exception: InsertIntoSQLDB->e.Message: " + e.Message);
-                connection.Close();
-            }
-        }
+				try {
+					//Fetch RateCard information First
+					string rateCardUrl = AzureResourceManagerUtil.GetRateCardRestApiCallURL(billingRequest.SubscriptionId, OfferCode, Currency, Locale, RegionInfo);
+					Trace.TraceInformation("Request cost info from RateCard service.");
 
-        public static List<UsageRecord> GetUsageDetails(string restURL, string orgID, RateCardPayload rateCardInfo)
-        {
-            string nextLink = "";
-            List<UsageRecord> usageRecords = new List<UsageRecord>();
+					RateCardPayload rateCardInfo = GetRateCardInfo(rateCardUrl, billingRequest.OrganizationId);
 
-            do
-            {
-                HttpWebResponse httpWebResponse = null;
+					if (rateCardInfo == null) {
+						Trace.TraceWarning("Problem receiving cost info occured - see log for details.");
+						continue;
+					} else {
+						Trace.TraceInformation("Received cost info: " + rateCardInfo.ToString());
+					}
 
-                if (nextLink != "")
-                    httpWebResponse = AzureResourceManagerUtil.BillingRestApiCall(nextLink, orgID);
-                else
-                    httpWebResponse = AzureResourceManagerUtil.BillingRestApiCall(restURL, orgID);
+					// if granularity=hourly then report up to prev. hour,
+					// if granularity=daily then report up to prev. day. Othervise will get 400 error
+					//DateTime sdt = DateTime.UtcNow.Date.AddYears(-3);
+					//DateTime edt = DateTime.UtcNow.Date.AddDays(-1);
 
-                if (httpWebResponse == null)
-                {
-                    Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Console.WriteLine("httpWebResponse == null");
-                    Console.WriteLine("     GetUsageDetails(string restURL, string orgID)");
-                    Console.WriteLine("     restURL: {0}", restURL);
-                    Console.WriteLine("     orgID: {0}", orgID);
+					// see: https://msdn.microsoft.com/en-us/library/azure/mt219004.aspx
+					string restUrl = AzureResourceManagerUtil.GetBillingRestApiCallUrl(billingRequest.SubscriptionId, true, true, billingRequest.StartDate, billingRequest.EndDate);
 
-                    // throw exception to start from scretch and retry.
-                    //throw new Exception("Possible reason: Bad request (400), Forbidden (403) to access. Server busy. Client blacklisted.");
-                }
-                else
-                {
-                    // look response codes @ https://msdn.microsoft.com/en-us/library/azure/mt219001.aspx
-                    if (httpWebResponse.StatusCode == HttpStatusCode.OK)
-                    {
-                        Console.WriteLine("Received Rest Call Response: HttpStatusCode.OK. Processing...");
-                        Stream receiveStream = httpWebResponse.GetResponseStream();
+					Trace.TraceInformation("Request usage data from Billing service.");
+					var usageRecords = GetUsageDetails(restUrl, billingRequest.OrganizationId, rateCardInfo);
+					Trace.TraceInformation($"Received record count: {usageRecords.Count}");
 
-                        // Pipes the stream to a higher level stream reader with the required encoding format. 
-                        StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
-                        string streamContent = readStream.ReadToEnd();
+					if (usageRecords.Count > 0) {
+						Trace.TraceInformation ("Inserting usage records into SQL database.");
+						Task<int> task = InsertIntoSqlDbAsync(usageRecords, billingRequest.SubscriptionId, billingRequest.StartDate, billingRequest.EndDate);
+						int recordCount = task.GetAwaiter().GetResult();
+						Trace.TraceInformation($"Total {recordCount} usage record(s) inserted.");
+					} else {
+						Trace.TraceInformation("No usage data found.");
+					}
 
-                        UsagePayload usagePayload = JsonConvert.DeserializeObject<UsagePayload>(streamContent);
+					break;
+				} catch (Exception e) {
+					Trace.TraceError($"Exception: {nameof(ProcessQueueMessage)} -> e.Message: " + e.Message);
+					lastException = e;
+					if (retriesLeft == 0) throw;
+				}
 
-                        foreach (UsageAggregate ua in usagePayload.value)
-                        {
-                            //Handle adding cost in
-                            var ur = new UsageRecord(ua);
-                            try {
-                                var meterInfo = rateCardInfo.Meters.Where(p => p.MeterId == ur.meterId).SingleOrDefault();
-                                ur.cost = meterInfo.MeterRates["0"] * Convert.ToDecimal(ur.quantity);
-                                if (ur.cost < 0.01M)
-                                    ur.cost = 0;
-                            } catch (Exception ex)
-                            {
-                                Console.WriteLine("Exception trying to apply cost info for meter: " + ur.meterId);
-                            }
-                            usageRecords.Add(ur);
-                        }
+				Trace.TraceInformation($"Sleeping in {nameof(ProcessQueueMessage)} while loop for 5 min. DateTime: {DateTime.UtcNow}");
+				Thread.Sleep(1000 * 60 * 5);
+			}   // while
 
-                        ContinuationToken contToken = JsonConvert.DeserializeObject<ContinuationToken>(streamContent);
-                        if (contToken.nextLink != null)
-                            nextLink = contToken.nextLink;
-                        else
-                            nextLink = "";
-                    }
-                    else if (httpWebResponse.StatusCode == HttpStatusCode.Accepted)
-                    {
-                        Console.WriteLine("Data not ready. HttpStatusCode.Accepted. Waiting 6 min. now: {0}", DateTime.Now.ToString());
-                        Thread.Sleep(1000 * 60 * 6);  // wait a bit to have data get prepared by azure
-                        nextLink = restURL;  // set next link to same URL for second call
-                    }
-                    else
-                    {
-                        Console.WriteLine("NEW RESPONSE TYPE. HANDLE THIS!");
-                        Console.WriteLine("code:{0} desc:{1}", httpWebResponse.StatusCode, httpWebResponse.StatusDescription);
-                    }
-                }
-            } while (nextLink != "");
+			Utils.UpdateSubscriptionStatus(billingRequest.SubscriptionId, DataGenStatus.Completed, DateTime.UtcNow);
 
-            return usageRecords;
-        }
+			Trace.TraceInformation($"WebJob process completed. SubscriptionId: {billingRequest.SubscriptionId}");
+		}
 
-        public static RateCardPayload GetRateCardInfo(string restURL, string orgID)
-        {            
-            HttpWebResponse httpWebResponse = null;
-            
-            httpWebResponse = AzureResourceManagerUtil.RateCardRestApiCall(restURL, orgID);
+		public static async Task<int> InsertIntoSqlDbAsync(IEnumerable<UsageRecord> usageRecords, Guid subscriptionId, DateTime startDate, DateTime endDate, CancellationToken token = default(CancellationToken))
+		{
+			int recordCount;
+			DateTime startTime;
+			TimeSpan processingTime;
 
-            if (httpWebResponse == null)
-            {
-                Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                Console.WriteLine("httpWebResponse == null");
-                Console.WriteLine("     GetRateCardInfo(string restURL, string orgID)");
-                Console.WriteLine("     restURL: {0}", restURL);
-                Console.WriteLine("     orgID: {0}", orgID);
+			SqlConnection connection = new SqlConnection(SqlConnectionString);
+			// note: it is important to specify at least repeatableread transaction isolation level - otherwise other transaction could simultaneously manipulate same record range
+			SqlCommand deleteUsageRecordCommand = new SqlCommand(@"delete from dbo.AzureUsageRecords with(repeatableread, rowlock)
+				where SubscriptionId = @subscriptionId and UsageStartTime = @usageStartTime and UsageEndTime = @usageEndTime", connection);
+			deleteUsageRecordCommand.CommandType = CommandType.Text;
+			var deleteParameters = deleteUsageRecordCommand.Parameters;
+			deleteParameters.Add("@subscriptionId", SqlDbType.UniqueIdentifier).Value = subscriptionId;
+			deleteParameters.Add("@usageStartTime", SqlDbType.DateTime2).Value = startDate;
+			deleteParameters.Add("@usageEndTime", SqlDbType.DateTime2).Value = endDate;
 
-                // throw exception to start from scretch and retry.
-                //throw new Exception("Possible reason: Bad request (400), Forbidden (403) to access. Server busy. Client blacklisted.");
-            }
-            else
-            {
-                // look response codes @ https://msdn.microsoft.com/en-us/library/azure/mt219001.aspx
-                if (httpWebResponse.StatusCode == HttpStatusCode.OK)
-                {
-                    Console.WriteLine("Received Rest Call Response: HttpStatusCode.OK. Processing...");
-                    Stream receiveStream = httpWebResponse.GetResponseStream();
+			SqlTransaction transaction = null;
 
-                    // Pipes the stream to a higher level stream reader with the required encoding format. 
-                    StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
-                    string streamContent = readStream.ReadToEnd();
+			try {
+				connection.Open();
+				transaction = connection.BeginTransaction();
+				deleteUsageRecordCommand.Transaction = transaction;
+				recordCount = deleteUsageRecordCommand.ExecuteNonQuery();
+				transaction.Commit();
+				if (recordCount > 0) Trace.TraceInformation($"{recordCount} existing record(s) deleted");
+			} catch {
+				transaction?.Rollback();
+			} finally {
+				transaction?.Dispose();
+				connection.Close();
+				connection.Dispose();
+			}
 
-                    RateCardPayload rateCardPayload = JsonConvert.DeserializeObject<RateCardPayload>(streamContent);
-                    return rateCardPayload;
-                }
-                else if (httpWebResponse.StatusCode == HttpStatusCode.Accepted)
-                {
-                    Console.WriteLine("Data not ready. HttpStatusCode.Accepted. Not capable of handling this.");
-                        
-                }
-                else
-                {
-                    Console.WriteLine("NEW RESPONSE TYPE. HANDLE THIS - GetRateCardInfo!");
-                    Console.WriteLine("code:{0} desc:{1}", httpWebResponse.StatusCode, httpWebResponse.StatusDescription);
-                }
-            }
-            return null;           
-        }
+			SqlBulkCopy bulkCopy = new SqlBulkCopy(SqlConnectionString, SqlBulkCopyOptions.FireTriggers | SqlBulkCopyOptions.TableLock);
+			bulkCopy.DestinationTableName = "dbo.AzureUsageRecords";
+			bulkCopy.BatchSize = 500;
+			bulkCopy.NotifyAfter = 1000;
+			bulkCopy.BulkCopyTimeout = 30;
+			bulkCopy.SqlRowsCopied += BulkCopy_SqlRowsCopied;
 
-        public static void ProcessQueueMessage([QueueTrigger("billingdatarequests")] BillingRequest br)
-        {
-            Console.WriteLine("Start webjob process. SubscriptionID: {0}", br.SubscriptionId);
-            int retriesLeft = Convert.ToInt32(ConfigurationManager.AppSettings["ida:RetryCountToProcessMessage"].ToString());
+			startTime = DateTime.UtcNow;
 
-            while (retriesLeft > 0)
-            {
-                --retriesLeft;
-                if (retriesLeft < 1)
-                {
-                    Console.WriteLine("Finished internal retries, throwing exception. Time:{0}", DateTime.UtcNow.ToString());
-                    throw new Exception();
-                }
+			try {
+				using (RecordDataReader<UsageRecord> recReader = new RecordDataReader<UsageRecord>(usageRecords, x => { return Sink(x, startDate.AddDays(-1), endDate); })) {
+					try {
+						await bulkCopy.WriteToServerAsync(recReader, token).ConfigureAwait(false);
+					} catch (Exception ex) {
+						throw;
+					}
 
-                Console.WriteLine("Start time:{0} Retries Left: {1}", DateTime.UtcNow.ToString(), retriesLeft);
+					recordCount = recReader.RecordsAffected;
+				}
+			} finally {
+				bulkCopy.Close();
+			}
 
-                try
-                {
-                    //Fetch RateCard information First
-                    string rateCardURL = AzureResourceManagerUtil.GetRateCardRestApiCallURL(br.SubscriptionId,
-                        ConfigurationManager.AppSettings["ida:OfferCode"].ToString(),
-                        ConfigurationManager.AppSettings["ida:Currency"].ToString(),
-                        ConfigurationManager.AppSettings["ida:Locale"].ToString(),
-                        ConfigurationManager.AppSettings["ida:RegionInfo"].ToString());
-                    Console.WriteLine("Request cost info from RateCard service.");
-                    RateCardPayload rateCardInfo = GetRateCardInfo(rateCardURL, br.OrganizationId);
-                    if (rateCardInfo == null)
-                    {
-                        Console.WriteLine("Problem receiving cost info occured - see log for details.");
-                        continue;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Received cost info: " + rateCardInfo.ToString());
-                    }
+			processingTime = DateTime.UtcNow.Subtract(startTime);
 
-                    // if granularity=hourly then report up to prev. hour,
-                    // if granularity=daily then report up to prev. day. Othervise will get 400 error
-                    //DateTime sdt = DateTime.Now.AddYears(-3);
-                    //DateTime edt = DateTime.Now.AddDays(-1);
+			return recordCount;
+		}
 
-                    string restURL = AzureResourceManagerUtil.GetBillingRestApiCallURL(br.SubscriptionId, true, true, br.StartDate, br.EndDate);
+		private static bool Sink(UsageRecord record, DateTime startDate, DateTime endDate)
+		{
+			return (record.UsageStartTime >= startDate && record.UsageEndTime <= endDate);
+			// where !tag.Key.StartsWith("hidden-") && !tag.Key.StartsWith("link:")
+		}
 
-                    Console.WriteLine("Request usage data from Billing service.");
-                    List<UsageRecord> urs = GetUsageDetails(restURL, br.OrganizationId, rateCardInfo);
-                    Console.WriteLine("Received record count: {0}", urs.Count);
+		private static void BulkCopy_SqlRowsCopied(object sender, SqlRowsCopiedEventArgs e)
+		{
+			if (Environment.UserInteractive) Trace.TraceInformation($"{e.RowsCopied:n0} rows inserted");
+		}
 
-                    Console.WriteLine("Insert usage data into SQL Server.");
-                    InsertIntoSQLDB(urs);
+		public static List<UsageRecord> GetUsageDetails(string restUrl, Guid orgId, RateCardPayload rateCardInfo)
+		{
+			string nextLink = "";
+			List<UsageRecord> usageRecords = new List<UsageRecord>();
 
-                    break;
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Exception: ProcessQueueMessage->e.Message: " + e.Message);
+			do {
+				HttpWebResponse httpWebResponse = null;
 
-                    if (retriesLeft == 0)
-                        throw;
-                }
+				try {
+					if (nextLink != "") {
+						httpWebResponse = AzureResourceManagerUtil.BillingRestApiCall(nextLink, orgId);
+					} else {
+						httpWebResponse = AzureResourceManagerUtil.BillingRestApiCall(restUrl, orgId);
+					}
 
-                Console.WriteLine("Sleeping in ProcessQueueMessage while loop for 5 min. DateTime: {0}", DateTime.Now.ToString());
-                Thread.Sleep(1000 * 60 * 5);
-            }   // while
+					if (httpWebResponse == null) {
+						Trace.TraceWarning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+						Trace.TraceWarning($"{nameof(httpWebResponse)} == null");
+						Trace.TraceWarning($"     {nameof(GetUsageDetails)}({nameof(restUrl)}, {nameof(orgId)})");
+						Trace.TraceWarning($"     {nameof(restUrl)}: {restUrl}");
+						Trace.TraceWarning($"     {nameof(orgId)}: {orgId}");
 
-            Commons.Utils.UpdateSubscriptionStatus(br.SubscriptionId, DataGenStatus.Completed, DateTime.UtcNow);
+						// throw exception to start from scretch and retry.
+						//throw new Exception("Possible reason: Bad request (400), Forbidden (403) to access. Server busy. Client blacklisted.");
+					} else {
+						// look response codes @ https://msdn.microsoft.com/en-us/library/azure/mt219001.aspx
+						if (httpWebResponse.StatusCode == HttpStatusCode.OK) {
+							Trace.TraceInformation($"Received Rest Call Response: {nameof(HttpStatusCode.OK)}. Processing...");
+							string streamContent;
 
-            Console.WriteLine("Complete webjob process. SubscriptionID: {0}", br.SubscriptionId);
-        }
-    }
+							using (Stream receiveStream = httpWebResponse.GetResponseStream()) {
+								// Pipes the stream to a higher level stream reader with the required encoding format. 
+								using (StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8)) {
+									streamContent = readStream.ReadToEnd();
+								}
+							}
+
+							UsagePayload usagePayload = JsonConvert.DeserializeObject<UsagePayload>(streamContent);
+
+							foreach (UsageAggregate ua in usagePayload.Value) {
+								// handle adding cost in
+								var usageRecord = new UsageRecord(ua);
+
+								try {
+									var meterInfo = rateCardInfo.Meters.Where(p => p.MeterId == usageRecord.MeterId).SingleOrDefault();
+
+									if (meterInfo.MeterRates.Count > 1) {
+										Trace.TraceWarning("Multiple rates for meter: " + usageRecord.MeterId);
+									}
+
+									usageRecord.Cost = (double)meterInfo.MeterRates["0"] * usageRecord.Quantity;
+									//if (usageRecord.cost < 0.01) usageRecord.cost = 0; // TODO: usage cost is definitelly NOT rounded like this
+								} catch (Exception ex) {
+									Trace.TraceError("Exception trying to apply cost info for meter: " + usageRecord.MeterId);
+								}
+
+								usageRecords.Add(usageRecord);
+							}
+
+							ContinuationToken contToken = JsonConvert.DeserializeObject<ContinuationToken>(streamContent);
+							nextLink = contToken.NextLink ?? "";
+						} else if (httpWebResponse.StatusCode == HttpStatusCode.Accepted) {
+							Trace.TraceWarning($"Data not ready. {nameof(HttpStatusCode.Accepted)}. Waiting 6 min. now: {DateTime.UtcNow}");
+							Thread.Sleep(1000 * 60 * 6);  // wait a bit to have data get prepared by azure
+							nextLink = restUrl;  // set next link to same URL for second call
+						} else {
+							Trace.TraceWarning("NEW RESPONSE TYPE. HANDLE THIS!");
+							Trace.TraceWarning($"code:{httpWebResponse.StatusCode} desc:{httpWebResponse.StatusDescription}");
+						}
+					}
+				} finally {
+					httpWebResponse?.Dispose();
+				}
+			} while (nextLink != "");
+
+			return usageRecords;
+		}
+
+		public static RateCardPayload GetRateCardInfo(string restUrl, Guid orgId)
+		{
+			HttpWebResponse httpWebResponse = AzureResourceManagerUtil.RateCardRestApiCall(restUrl, orgId);
+
+			try {
+				if (httpWebResponse == null) {
+					Trace.TraceWarning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+					Trace.TraceWarning($"{nameof(httpWebResponse)} == null");
+					Trace.TraceWarning($"     {nameof(GetRateCardInfo)}({nameof(restUrl)}, {nameof(orgId)})");
+					Trace.TraceWarning($"     {nameof(restUrl)}: {restUrl}");
+					Trace.TraceWarning($"     {nameof(orgId)}: {orgId}");
+					// throw exception to start from scretch and retry.
+					//throw new Exception("Possible reason: Bad request (400), Forbidden (403) to access. Server busy. Client blacklisted.");
+				} else {
+					// look response codes @ https://msdn.microsoft.com/en-us/library/azure/mt219001.aspx
+					// see: https://msdn.microsoft.com/en-us/library/azure/mt219004.aspx
+					if (httpWebResponse.StatusCode == HttpStatusCode.OK) {
+						Trace.TraceInformation($"Received Rest Call Response: {nameof(HttpStatusCode.OK)}. Processing...");
+						string streamContent;
+
+						using (Stream receiveStream = httpWebResponse.GetResponseStream()) {
+							// Pipes the stream to a higher level stream reader with the required encoding format. 
+							using (StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8)) {
+								streamContent = readStream.ReadToEnd();
+							}
+						}
+
+						RateCardPayload rateCardPayload = JsonConvert.DeserializeObject<RateCardPayload>(streamContent);
+						return rateCardPayload;
+					} else if (httpWebResponse.StatusCode == HttpStatusCode.Accepted) {
+						Trace.TraceWarning($"Data not ready. {nameof(HttpStatusCode.Accepted)}. Not capable of handling this.");
+					} else {
+						Trace.TraceWarning("NEW RESPONSE TYPE. HANDLE THIS - GetRateCardInfo!");
+						Trace.TraceWarning($"code:{httpWebResponse.StatusCode} desc:{httpWebResponse.StatusDescription}");
+					}
+				}
+
+				return null;
+			} finally {
+				httpWebResponse?.Dispose();
+			}
+		}
+	}
 }
