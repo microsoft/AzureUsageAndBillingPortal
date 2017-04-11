@@ -125,7 +125,7 @@ To publish the WebJobBillingData webjob project, right click on the project name
 
 You can follow the similar steps publish the webapps above. We prefer to publish all webjobs under the Dashboard webapp as it will have enough resources to handle all workloads (it will probably have less network traffic, etc.)
 
-**WebJobUsageDaily** Same as WebJobBillingData project parameter settings. This webjob type is scheduled. It will not run continuously and you have to set a schedule that it will only run according to the schedule (i.e. everyday night) You can set the schedule from the management portal or in the “webjob-publish-settings.json” under project properties.
+**WebJobUsageDaily** Similar as WebJobBillingData project parameter settings. This webjob type is scheduled. You can set the schedule in App.config file (JobDailySchedule param) or using App Service "Application settings" page. Note that for Web Job in order to run on schedule App Service "Always On" option needs to be activated, which requires Standard or Premium service plan.
 
 Publishing this webjob on Azure will be the same as the previous webjob.
 
