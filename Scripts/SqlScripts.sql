@@ -291,3 +291,11 @@ where AdditionalInfo is not null and AdditionalInfo != ''
 GO
 ALTER TABLE [dbo].[AzureUsageRecords] ENABLE TRIGGER [AzureUsageRecords_InsertTrigger]
 GO
+
+create view dbo.AzureUsageRecordsView
+as
+select [Uid], Id, [Name], [Type], SubscriptionId, UsageStartTime, UsageEndTime, MeterId, MeteredRegion, MeteredService, Project, MeteredServiceType, ServiceInfo1, ResourceUri, [Location], PartNumber, OrderNumber, Quantity, Unit, MeterName, MeterCategory, MeterSubCategory, MeterRegion, Cost,
+ResourceGroup = case when len(ResourceUri) > 68 then substring(ResourceUri, 68, charindex('/', ResourceUri, 68) - 68) else '' end,
+ResourceName = case when len(ResourceUri) > 2 then substring(ResourceUri, len(ResourceUri) - charindex('/', reverse(ResourceUri))+2, charindex('/', reverse(ResourceUri))-1) else '' end
+from dbo.AzureUsageRecords
+GO
