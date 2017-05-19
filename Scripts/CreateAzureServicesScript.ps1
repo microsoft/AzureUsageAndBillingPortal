@@ -21,10 +21,16 @@ $TemplateFileFullPath = $WorkingDir + $TemplateFileName
 
 # If you have more than one subscription, please specify the name of the subscription that you want to use among them.
 # If you are not sure how many subscriptions you have and want to use the default one, than keep it this parameter as $AzureSubscriptionName = ""
-$AzureSubscriptionName = "Visual Studio Ultimate with MSDN"
+$AzureSubscriptionName = "BizSpark"
 
+# !!! IMPORTANT !!!
+# Please refer to "Naming Rules and Restrictions" under https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions  
 # identification / version suffix in service names. Probably one another user is using this value too. Make it unique! (i.e. with your initials)
-$suffix = "20"
+# Name must be unique. Below try to generate a unique name but not guaranteed as we cant use whole GUID because of name length limit on azure services
+$suffix = "-" + [guid]::NewGuid()
+$suffix = $suffix -replace '-'
+$suffix = $suffix.ToLower()
+$suffix = $suffix.Substring(0, 10)
 
 # Azure resource group parameters
 $ResourceGroupName = ("aui-resource-group" + $suffix)
@@ -39,7 +45,7 @@ $StorageAccountLocation = $ResourceGroupLocation
 # This will create an AzureSQL Standard S0 instance please review https://azure.microsoft.com/pricing/details/sql-database/ for price details
 $SqlServerName = ("auisqlsr" + $suffix)
 $SqlServerLocation = $ResourceGroupLocation
-$SQLServerVersion = "2.0"
+$SQLServerVersion = "12.0"
 $SqlAdministratorLogin = "mksa"
 $SqlAdministratorLoginPassword = "Password.1%"
 $SqlDatabaseName = ("auisqldb" + $suffix)
@@ -93,7 +99,7 @@ $ResourceParameters = @{
     sqlCollation = "SQL_Latin1_General_CP1_CI_AS";
     sqlEdition = $sqlEdition;
     sqlMaxSizeBytes = "1073741824";
-	sqlRequestedServiceObjectiveName = $sqlRequestedServiceObjectiveName;
+    sqlRequestedServiceObjectiveName = $sqlRequestedServiceObjectiveName;
 
     # website parameters
     registrationWebSiteName = $Web1SiteName;
@@ -153,9 +159,9 @@ Write-Host ("Data Source=tcp:" + $SqlServerName + ".database.windows.net,1433;In
 Write-Host "ida:TenantId: " -foreground Green –NoNewLine
 Write-Host $tenantID -foreground Red 
 Write-Host "AzureWebJobsDashboard: " -foreground Green –NoNewLine
-Write-Host ("DefaultEndpointsProtocol=https;AccountName=" + $StorageAccountName + ";AccountKey=" + $storageKey[0].value) -foreground Red 
+Write-Host ("DefaultEndpointsProtocol=https;AccountName=" + $StorageAccountName + ";AccountKey=" + $storageKey[0].Value) -foreground Red 
 Write-Host "AzureWebJobsStorage: " -foreground Green –NoNewLine
-Write-Host ("DefaultEndpointsProtocol=https;AccountName=" + $StorageAccountName + ";AccountKey=" + $storageKey[0].value) -foreground Red 
+Write-Host ("DefaultEndpointsProtocol=https;AccountName=" + $StorageAccountName + ";AccountKey=" + $storageKey[0].Value) -foreground Red 
 
 Write-Host ("Some manuel settings to be done!") -foreground Yellow
 

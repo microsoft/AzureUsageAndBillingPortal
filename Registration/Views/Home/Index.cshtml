@@ -120,7 +120,7 @@
                                     {
                                         Id = @subscription.Id,
                                         OrganizationId = @subscription.OrganizationId,
-                                        ServicePrincipalObjectId = Model.UserOrganizations[@subscription.OrganizationId].objectIdOfUsageServicePrincipal
+                                        ServicePrincipalObjectId = Model.UserOrganizations[@subscription.OrganizationId].ObjectIdOfUsageServicePrincipal
                                     },
                                     new { @class = "btn btn-danger btn-xs" })
 
@@ -133,7 +133,7 @@
                                     {
                                         Id = @subscription.Id,
                                         OrganizationId = @subscription.OrganizationId,
-                                        ServicePrincipalObjectId = Model.UserOrganizations[@subscription.OrganizationId].objectIdOfUsageServicePrincipal
+                                        ServicePrincipalObjectId = Model.UserOrganizations[@subscription.OrganizationId].ObjectIdOfUsageServicePrincipal
                                     },
                                     new { @class = "btn btn-info btn-xs" })
                                 <small> Access in Azure needs to be repaired!</small>
@@ -148,7 +148,7 @@
                                         <input name="Id" type="hidden" value="@subscription.Id">
                                         <input name="OrganizationId" type="hidden" value="@subscription.OrganizationId">
                                         <input name="DisplayName" type="hidden" value="@subscription.DisplayName">
-                                        <input name="ServicePrincipalObjectId" type="hidden" value="@Model.UserOrganizations[@subscription.OrganizationId].objectIdOfUsageServicePrincipal">
+                                        <input name="ServicePrincipalObjectId" type="hidden" value="@Model.UserOrganizations[@subscription.OrganizationId].ObjectIdOfUsageServicePrincipal">
                                         <small><a href="#" data-toggle="tooltip" title="Instead of your referring your subscriptionID or subscription name, enter an explanatory name to associate with this registration. i.e. Your Name/Surname">Enter a display name and click "Allow Monitoring".</a></small>
                                         <span class="input-group-btn">
                                             <button class="btn btn-primary btn-sm" type="submit">Allow Monitoring</button>

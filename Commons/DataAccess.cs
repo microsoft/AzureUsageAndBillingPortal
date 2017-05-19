@@ -19,7 +19,7 @@ namespace Commons
 	public class DataAccess : DbContext
 	{
 		// Name of the connection string to the SQL Server
-		public DataAccess() : base("SqlConnectionString") { }
+		public DataAccess() : base("ASQLConn") { }
 		public DbSet<Subscription> Subscriptions { get; set; }
 		public DbSet<ReportRequest> ReportRequests { get; set; }
 		public DbSet<PerUserTokenCache> PerUserTokenCacheList { get; set; }
