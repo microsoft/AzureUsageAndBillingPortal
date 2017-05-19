@@ -30,7 +30,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach (string key in Model.subscriptionList.Keys)
+                                        @foreach (Guid key in Model.subscriptionList.Keys)
                                         {
                                             Commons.Subscription s = Model.subscriptionList[key];
                                             <tr>

@@ -1,5 +1,5 @@
 ﻿//------------------------------------------ START OF LICENSE -----------------------------------------
-//Azure Usage Insights Portal
+//Azure Usage and Billing Insights
 //
 //Copyright(c) Microsoft Corporation
 //
@@ -22,6 +22,7 @@
 //OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 //CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //----------------------------------------------- END OF LICENSE ------------------------------------------
+
 using Commons;
 using Dashboard.Models;
 using Microsoft.WindowsAzure.Storage;
@@ -36,132 +37,126 @@ using System.Web.Mvc;
 
 namespace Dashboard.Controllers
 {
-    [Authorize]
-    public class DashboardCSVController : Controller
-    {
-        static private DashboardCSVModel dm = new DashboardCSVModel();
-        private DataAccess db = new DataAccess();
-        private CloudQueue reportRequestsQueue;
+	[Authorize]
+	public class DashboardCSVController : Controller
+	{
+		static private DashboardCsvModel dm = new DashboardCsvModel();
+		private DataAccess db = new DataAccess();
+		private CloudQueue reportRequestsQueue;
 
-        public DashboardCSVController()
-        {
-            InitializeStorage();
-        }
+		public DashboardCSVController()
+		{
+			InitializeStorage();
+		}
 
-        private void InitializeStorage()
-        {
-            // Open storage account using credentials from .cscfg file.
-            var storageAccount = CloudStorageAccount.Parse(ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ToString());
+		private void InitializeStorage()
+		{
+			// Open storage account using credentials from .cscfg file.
+			var storageAccount = CloudStorageAccount.Parse(ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ToString());
 
-            // Get context object for working with queues, and Get a reference to the queue.
-            CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
-            reportRequestsQueue = queueClient.GetQueueReference(ConfigurationManager.AppSettings["ida:QueueReportRequest"].ToString());
-            reportRequestsQueue.CreateIfNotExists();
+			// Get context object for working with queues, and Get a reference to the queue.
+			CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
+			reportRequestsQueue = queueClient.GetQueueReference(ConfigurationManager.AppSettings["ida:QueueReportRequest"].ToString());
+			reportRequestsQueue.CreateIfNotExists();
 
-            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-            CloudBlobContainer csvContainer = blobClient.GetContainerReference(ConfigurationManager.AppSettings["ida:BlobReportPublish"].ToString());
-            csvContainer.CreateIfNotExists();
+			CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+			CloudBlobContainer csvContainer = blobClient.GetContainerReference(ConfigurationManager.AppSettings["ida:BlobReportPublish"].ToString());
+			csvContainer.CreateIfNotExists();
 
-            // create new permissions
-            BlobContainerPermissions perms = new BlobContainerPermissions();
-            perms.PublicAccess = BlobContainerPublicAccessType.Blob; // blob public access
-            csvContainer.SetPermissions(perms);
-        }
+			// create new permissions
+			BlobContainerPermissions perms = new BlobContainerPermissions();
+			perms.PublicAccess = BlobContainerPublicAccessType.Blob; // blob public access
+			csvContainer.SetPermissions(perms);
+		}
 
-        // GET: Dashboard
-        public ActionResult Index()
-        {
-            dm.userSubscriptionsList.Clear();
-            foreach (var s in db.Subscriptions.OrderBy(e => e.DisplayTag))
-                dm.userSubscriptionsList.Add(s.Id, s);
+		// GET: Dashboard
+		public ActionResult Index()
+		{
+			dm.userSubscriptionsList.Clear();
+			foreach (var s in db.Subscriptions.OrderBy(e => e.DisplayTag))
+				dm.userSubscriptionsList.Add(s.Id, s);
 
-            if (dm.userSubscriptionsList.Count > 0 && dm.selectedUserSubscriptions.Count < 1)
-                dm.selectedUserSubscriptions.Add(dm.userSubscriptionsList.ElementAt(0).Key);
+			if (dm.userSubscriptionsList.Count > 0 && dm.selectedUserSubscriptions.Count < 1)
+				dm.selectedUserSubscriptions.Add(dm.userSubscriptionsList.ElementAt(0).Key);
 
-            dm.repReqsList.Clear();
-            foreach (var j in db.ReportRequests.OrderByDescending(e => e.reportDate))
-                dm.repReqsList.Add(j.repReqID, j);
+			dm.repReqsList.Clear();
+			foreach (var j in db.ReportRequests.OrderByDescending(e => e.ReportDate))
+				dm.repReqsList.Add(j.RepReqId, j);
 
-            return View(dm);
-        }
+			return View(dm);
+		}
 
-        public async Task<ActionResult> CreateReport(string sdatemonth, string sdateday, string sdateyear,
-                                         string edatemonth, string edateday, string edateyear,
-                                         string period, string detailed, string [] subslist)
-        {
-            try
-            {
-                dm.startDateMonth = Convert.ToInt32(sdatemonth);
-                dm.startDateDay = Convert.ToInt32(sdateday);
-                dm.startDateYear = Convert.ToInt32(sdateyear);
+		public async Task<ActionResult> CreateReport(string sdatemonth, string sdateday, string sdateyear,
+										 string edatemonth, string edateday, string edateyear,
+										 string period, string detailed, Guid[] subslist)
+		{
+			try {
+				dm.startDateMonth = Convert.ToInt32(sdatemonth);
+				dm.startDateDay = Convert.ToInt32(sdateday);
+				dm.startDateYear = Convert.ToInt32(sdateyear);
 
-                dm.endDateMonth = Convert.ToInt32(edatemonth);
-                dm.endDateDay = Convert.ToInt32(edateday);
-                dm.endDateYear = Convert.ToInt32(edateyear);
+				dm.endDateMonth = Convert.ToInt32(edatemonth);
+				dm.endDateDay = Convert.ToInt32(edateday);
+				dm.endDateYear = Convert.ToInt32(edateyear);
 
-                dm.detailedReport = (detailed == "d" ? true : false);
-                dm.dailyReport = (period == "d" ? true : false);
+				dm.detailedReport = (detailed == "d" ? true : false);
+				dm.dailyReport = (period == "d" ? true : false);
 
-                if (subslist != null)
-                    dm.selectedUserSubscriptions = subslist.ToList();
+				if (subslist != null)
+					dm.selectedUserSubscriptions = subslist.ToList();
 
-                if (dm.selectedUserSubscriptions.Count() < 1)
-                    throw new Exception("No Azure subscription is selected. Select from list and try again (may use CTRL for multiple selection).");
+				if (dm.selectedUserSubscriptions.Count() < 1)
+					throw new Exception("No Azure subscription is selected. Select from list and try again (may use CTRL for multiple selection).");
 
-                DateTime s, e;
-                try
-                {
-                    s = new DateTime(dm.startDateYear, dm.startDateMonth, dm.startDateDay);
-                    e = new DateTime(dm.endDateYear, dm.endDateMonth, dm.endDateDay);
-                } catch
-                {
-                    throw new Exception("Invalid date input.");
-                }
+				DateTime s, e;
+				try {
+					s = new DateTime(dm.startDateYear, dm.startDateMonth, dm.startDateDay);
+					e = new DateTime(dm.endDateYear, dm.endDateMonth, dm.endDateDay);
+				} catch {
+					throw new Exception("Invalid date input.");
+				}
 
-                TimeSpan ts = e.Subtract(s);
-                if (ts.TotalDays > 150)
-                    throw new Exception("Time interval can not be greater than 150 (5 month) days");
+				TimeSpan ts = e.Subtract(s);
+				if (ts.TotalDays > 150)
+					throw new Exception("Time interval can not be greater than 150 (5 month) days");
 
-                if (ts.TotalDays < 1)
-                    throw new Exception("Start date can not be later than or equal to the end date.");
+				if (ts.TotalDays < 1)
+					throw new Exception("Start date can not be later than or equal to the end date.");
 
 
-                
-                
-                // now we have all parameters set. Ready to create jobs and send them to Storage queue to be processed by webjob
-                ReportRequest rr = new ReportRequest();
-                rr.reportDate = DateTime.UtcNow;
-                rr.startDate = s;
-                rr.endDate = e;
-                rr.detailedReport = dm.detailedReport;
-                rr.dailyReport = dm.dailyReport;
-
-                foreach (string sid in dm.selectedUserSubscriptions)
-                {
-                    Subscription subs = dm.userSubscriptionsList[sid];
-                    if (subs == null)
-                        continue;
-
-                    Report rjd = new Report();
-                    rjd.subscriptionID = subs.Id;
-                    rjd.organizationID = subs.OrganizationId;
-                    rr.repReqs.Add(rjd);
-                }
-
-                db.ReportRequests.Add(rr);
-                db.SaveChanges();
 
 
-                var queueMessage = new CloudQueueMessage(JsonConvert.SerializeObject(rr));
-                await reportRequestsQueue.AddMessageAsync(queueMessage);
-            }
-            catch (Exception e)
-            {
-                //dm.Reset();
-                return RedirectToAction("Error", "Home", new { msg = e.Message } );
-            }
+				// now we have all parameters set. Ready to create jobs and send them to Storage queue to be processed by webjob
+				ReportRequest rr = new ReportRequest();
+				rr.ReportDate = DateTime.UtcNow;
+				rr.StartDate = s;
+				rr.EndDate = e;
+				rr.DetailedReport = dm.detailedReport;
+				rr.DailyReport = dm.dailyReport;
 
-            return RedirectToAction("Index", "Dashboard");
-        }
-    }
+				foreach (Guid sid in dm.selectedUserSubscriptions) {
+					Subscription subs = dm.userSubscriptionsList[sid];
+					if (subs == null)
+						continue;
+
+					Report rjd = new Report();
+					rjd.SubscriptionId = subs.Id;
+					rjd.OrganizationId = subs.OrganizationId;
+					rr.RepReqs.Add(rjd);
+				}
+
+				db.ReportRequests.Add(rr);
+				db.SaveChanges();
+
+
+				var queueMessage = new CloudQueueMessage(JsonConvert.SerializeObject(rr));
+				await reportRequestsQueue.AddMessageAsync(queueMessage);
+			} catch (Exception e) {
+				//dm.Reset();
+				return RedirectToAction("Error", "Home", new { msg = e.Message });
+			}
+
+			return RedirectToAction("Index", "Dashboard");
+		}
+	}
 }

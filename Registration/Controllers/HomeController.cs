@@ -1,5 +1,5 @@
 ﻿//------------------------------------------ START OF LICENSE -----------------------------------------
-//Azure Usage Insights Portal
+//Azure Usage and Billing Insights
 //
 //Copyright(c) Microsoft Corporation
 //
@@ -22,6 +22,7 @@
 //OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 //CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //----------------------------------------------- END OF LICENSE ------------------------------------------
+
 using Commons;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
@@ -39,160 +40,151 @@ using System.Web.Mvc;
 
 namespace Registration.Controllers
 {
-    public class HomeController : Controller
-    {
-        private DataAccess db = new DataAccess();
-        public ActionResult Index()
-        {
-            HomeIndexViewModel model = null;
+	public class HomeController : Controller
+	{
+		private DataAccess db = new DataAccess();
+		public ActionResult Index()
+		{
+			HomeIndexViewModel model = null;
 
-            if (ClaimsPrincipal.Current.Identity.IsAuthenticated)
-            {
-                model = new HomeIndexViewModel();
-                model.UserOrganizations = new Dictionary<string, Organization>();
-                model.UserSubscriptions = new Dictionary<string, Subscription>();
-                model.UserCanManageAccessForSubscriptions = new List<string>();
-                model.DisconnectedUserOrganizations = new List<string>();
+			if (ClaimsPrincipal.Current.Identity.IsAuthenticated) {
+				model = new HomeIndexViewModel();
+				model.UserOrganizations = new Dictionary<Guid, Organization>();
+				model.UserSubscriptions = new Dictionary<Guid, Subscription>();
+				model.UserCanManageAccessForSubscriptions = new List<Guid>();
+				model.DisconnectedUserOrganizations = new List<Guid>();
 
-                var organizations = AzureResourceManagerUtil.GetUserOrganizations();
-                foreach (Organization org in organizations)
-                {
-                    model.UserOrganizations.Add(org.Id, org);
-                    var subscriptions = AzureResourceManagerUtil.GetUserSubscriptions(org.Id);
+				var organizations = AzureResourceManagerUtil.GetUserOrganizations();
+				foreach (Organization org in organizations) {
+					model.UserOrganizations.Add(org.Id, org);
+					var subscriptions = AzureResourceManagerUtil.GetUserSubscriptions(org.Id);
 
-                    if (subscriptions != null)
-                    {
-                        foreach (var subscription in subscriptions)
-                        {
+					if (subscriptions != null) {
+						foreach (var subscription in subscriptions) {
+							Subscription s = db.Subscriptions.Find(subscription.Id);
 
-                            Subscription s = db.Subscriptions.Find(subscription.Id);
-                            if (s != null)
-                            {
-                                subscription.IsConnected = true;
-                                subscription.ConnectedOn = s.ConnectedOn;
-                                subscription.ConnectedBy = s.ConnectedBy;
-                                subscription.DisplayTag = s.DisplayTag;
-                                subscription.AzureAccessNeedsToBeRepaired = !AzureResourceManagerUtil.ServicePrincipalHasReadAccessToSubscription(subscription.Id, org.Id);
-                            }
-                            else
-                            {
-                                subscription.IsConnected = false;
-                            }
-                            model.UserSubscriptions.Add(subscription.Id, subscription);
+							if (s != null) {
+								subscription.IsConnected = true;
+								subscription.ConnectedOn = s.ConnectedOn;
+								subscription.ConnectedBy = s.ConnectedBy;
+								subscription.DisplayTag = s.DisplayTag;
+								subscription.AzureAccessNeedsToBeRepaired = !AzureResourceManagerUtil.ServicePrincipalHasReadAccessToSubscription(subscription.Id, org.Id);
+							} else {
+								subscription.IsConnected = false;
+							}
 
-                            if (AzureResourceManagerUtil.UserCanManageAccessForSubscription(subscription.Id, org.Id))
-                                model.UserCanManageAccessForSubscriptions.Add(subscription.Id);
-                        }
-                    }
-                    else
-                        model.DisconnectedUserOrganizations.Add(org.Id);
-                }
-            }
+							model.UserSubscriptions.Add(subscription.Id, subscription);
 
-            return View(model);
-        }
-        public void Register(string directoryName = "common", bool isMSA = false)
-        {
-            if (!Request.IsAuthenticated)
-            {
-                // note configuration (keys, etc…) will not necessarily understand this authority.
-                HttpContext.GetOwinContext().Environment.Add("Authority", string.Format(ConfigurationManager.AppSettings["ida:Authority"] + "OAuth2/Authorize", directoryName));
-                if (isMSA) HttpContext.GetOwinContext().Environment.Add("DomainHint", "live.com");
-                HttpContext.GetOwinContext().Authentication.Challenge(new AuthenticationProperties { RedirectUri = this.Url.Action("Index", "Home") }, OpenIdConnectAuthenticationDefaults.AuthenticationType);
-            }
-        }
-        public ActionResult SignOut()
-        {
-            HttpContext.GetOwinContext().Authentication.SignOut(
-                OpenIdConnectAuthenticationDefaults.AuthenticationType, 
-                CookieAuthenticationDefaults.AuthenticationType);
+							if (AzureResourceManagerUtil.UserCanManageAccessForSubscription(subscription.Id, org.Id))
+								model.UserCanManageAccessForSubscriptions.Add(subscription.Id);
+						}
+					} else
+						model.DisconnectedUserOrganizations.Add(org.Id);
+				}
+			}
 
-            return RedirectToAction("Index", "Home");
-        }
-        public ActionResult Connect([Bind(Include = "Id, OrganizationId, DisplayName")] Subscription subscription, string servicePrincipalObjectId, string displayTag)
-        {
-            if (ModelState.IsValid)
-            {
-                AzureResourceManagerUtil.RevokeRoleFromServicePrincipalOnSubscription(servicePrincipalObjectId, subscription.Id, subscription.OrganizationId);
+			return View(model);
+		}
 
-                AzureResourceManagerUtil.GrantRoleToServicePrincipalOnSubscription(servicePrincipalObjectId, subscription.Id, subscription.OrganizationId);
+		public void Register(string directoryName = "common", bool isMSA = false)
+		{
+			if (!Request.IsAuthenticated) {
+				// note configuration (keys, etc…) will not necessarily understand this authority.
+				HttpContext.GetOwinContext().Environment.Add("Authority", String.Format(ConfigurationManager.AppSettings["ida:Authority"] + "OAuth2/Authorize", directoryName));
+				if (isMSA) HttpContext.GetOwinContext().Environment.Add("DomainHint", "live.com");
+				HttpContext.GetOwinContext().Authentication.Challenge(new AuthenticationProperties { RedirectUri = this.Url.Action("Index", "Home") }, OpenIdConnectAuthenticationDefaults.AuthenticationType);
+			}
+		}
 
-                if (AzureResourceManagerUtil.ServicePrincipalHasReadAccessToSubscription(subscription.Id, subscription.OrganizationId))
-                {
-                    // Insert into SQL DB
-                    subscription.ConnectedBy = (System.Security.Claims.ClaimsPrincipal.Current).FindFirst(ClaimTypes.Name).Value;
-                    subscription.ConnectedOn = DateTime.Now;
-                    subscription.AzureAccessNeedsToBeRepaired = false;
-                    subscription.DisplayTag = displayTag;
+		public ActionResult SignOut()
+		{
+			HttpContext.GetOwinContext().Authentication.SignOut(
+				OpenIdConnectAuthenticationDefaults.AuthenticationType,
+				CookieAuthenticationDefaults.AuthenticationType);
 
-                    subscription.DataGenDate = DateTime.UtcNow;
-                    subscription.DataGenStatus = DataGenStatus.Pending;
+			return RedirectToAction("Index", "Home");
+		}
 
-                    db.Subscriptions.Add(subscription);
-                    db.SaveChanges();
+		public ActionResult Connect([Bind(Include = "Id, OrganizationId, DisplayName")] Subscription subscription, string servicePrincipalObjectId, string displayTag)
+		{
+			if (ModelState.IsValid) {
+				AzureResourceManagerUtil.RevokeRoleFromServicePrincipalOnSubscription(servicePrincipalObjectId, subscription.Id, subscription.OrganizationId);
+				AzureResourceManagerUtil.GrantRoleToServicePrincipalOnSubscription(servicePrincipalObjectId, subscription.Id, subscription.OrganizationId);
+
+				if (AzureResourceManagerUtil.ServicePrincipalHasReadAccessToSubscription(subscription.Id, subscription.OrganizationId)) {
+					// Insert into SQL DB
+					subscription.ConnectedBy = (ClaimsPrincipal.Current).FindFirst(ClaimTypes.Name).Value;
+					subscription.ConnectedOn = DateTime.UtcNow;
+					subscription.AzureAccessNeedsToBeRepaired = false;
+					subscription.DisplayTag = displayTag;
+
+					subscription.DataGenDate = DateTime.UtcNow;
+					subscription.DataGenStatus = DataGenStatus.Pending;
+
+					db.Subscriptions.Add(subscription);
+					db.SaveChanges();
 
 
-                    DateTime sdt = DateTime.Now.AddYears(-3);
-                    DateTime edt = DateTime.Now.AddDays(-1);
-                    BillingRequest br = new BillingRequest(subscription.Id, subscription.OrganizationId, sdt, edt);
+					DateTime sdt = DateTime.UtcNow.Date.AddYears(-3);
+					DateTime edt = DateTime.UtcNow.Date.AddDays(-1);
+					BillingRequest br = new BillingRequest(subscription.Id, subscription.OrganizationId, sdt, edt);
 
-                    // Insert into Azure Storage Queue
-                    var storageAccount = CloudStorageAccount.Parse(ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ToString());
-                    CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
-                    CloudQueue subscriptionsQueue = queueClient.GetQueueReference(ConfigurationManager.AppSettings["ida:QueueBillingDataRequests"].ToString());
-                    subscriptionsQueue.CreateIfNotExists();
-                    var queueMessage = new CloudQueueMessage(JsonConvert.SerializeObject(br));
-                    subscriptionsQueue.AddMessageAsync(queueMessage);
-                }
-            }
+					// Insert into Azure Storage Queue
+					var storageAccount = CloudStorageAccount.Parse(ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ToString());
+					CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
+					CloudQueue subscriptionsQueue = queueClient.GetQueueReference(ConfigurationManager.AppSettings["ida:QueueBillingDataRequests"].ToString());
+					subscriptionsQueue.CreateIfNotExists();
+					var queueMessage = new CloudQueueMessage(JsonConvert.SerializeObject(br));
+					subscriptionsQueue.AddMessageAsync(queueMessage);
+				}
+			}
 
-            return RedirectToAction("Index", "Home");
-        }
-        public ActionResult Disconnect([Bind(Include = "Id, OrganizationId")] Subscription subscription, string servicePrincipalObjectId)
-        {
-            if (ModelState.IsValid)
-            {
-                AzureResourceManagerUtil.RevokeRoleFromServicePrincipalOnSubscription(servicePrincipalObjectId, subscription.Id, subscription.OrganizationId);
+			return RedirectToAction("Index", "Home");
+		}
 
-                Subscription s = db.Subscriptions.Find(subscription.Id);
-                if (s != null)
-                {
-                    db.Subscriptions.Remove(s);
-                    db.SaveChanges();
-                }
-            }
+		public ActionResult Disconnect([Bind(Include = "Id, OrganizationId")] Subscription subscription, string servicePrincipalObjectId)
+		{
+			if (ModelState.IsValid) {
+				AzureResourceManagerUtil.RevokeRoleFromServicePrincipalOnSubscription(servicePrincipalObjectId, subscription.Id, subscription.OrganizationId);
+				Subscription s = db.Subscriptions.Find(subscription.Id);
 
-            return RedirectToAction("Index", "Home");
-        }
-        public ActionResult RepairAccess([Bind(Include = "Id, OrganizationId")] Subscription subscription, string servicePrincipalObjectId)
-        {
-            if (ModelState.IsValid)
-            {
-                AzureResourceManagerUtil.RevokeRoleFromServicePrincipalOnSubscription(servicePrincipalObjectId, subscription.Id, subscription.OrganizationId);
-                AzureResourceManagerUtil.GrantRoleToServicePrincipalOnSubscription(servicePrincipalObjectId, subscription.Id, subscription.OrganizationId);
+				if (s != null) {
+					db.Subscriptions.Remove(s);
+					db.SaveChanges();
+				}
+			}
 
-                Subscription s = db.Subscriptions.Find(subscription.Id);
-                if (s != null)
-                {
-                    s.AzureAccessNeedsToBeRepaired = false;
-                    db.Entry(s).State = System.Data.Entity.EntityState.Modified;
-                    db.SaveChanges();
-                }
-            }
+			return RedirectToAction("Index", "Home");
+		}
 
-            return RedirectToAction("Index", "Home");
-        }
-        public ActionResult Error()
-        {
-            return View();
-        }
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-    }
+		public ActionResult RepairAccess([Bind(Include = "Id, OrganizationId")] Subscription subscription, string servicePrincipalObjectId)
+		{
+			if (ModelState.IsValid) {
+				AzureResourceManagerUtil.RevokeRoleFromServicePrincipalOnSubscription(servicePrincipalObjectId, subscription.Id, subscription.OrganizationId);
+				AzureResourceManagerUtil.GrantRoleToServicePrincipalOnSubscription(servicePrincipalObjectId, subscription.Id, subscription.OrganizationId);
+				Subscription s = db.Subscriptions.Find(subscription.Id);
+
+				if (s != null) {
+					s.AzureAccessNeedsToBeRepaired = false;
+					db.Entry(s).State = System.Data.Entity.EntityState.Modified;
+					db.SaveChanges();
+				}
+			}
+
+			return RedirectToAction("Index", "Home");
+		}
+
+		public ActionResult Error()
+		{
+			return View();
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing) {
+				db.Dispose();
+			}
+			base.Dispose(disposing);
+		}
+	}
 }

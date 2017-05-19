@@ -1,5 +1,5 @@
 ﻿//------------------------------------------ START OF LICENSE -----------------------------------------
-//Azure Usage Insights Portal
+//Azure Usage and Billing Insights
 //
 //Copyright(c) Microsoft Corporation
 //
@@ -22,6 +22,7 @@
 //OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 //CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //----------------------------------------------- END OF LICENSE ------------------------------------------
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,17 +31,17 @@ using System.Web.Mvc;
 
 namespace Dashboard.Controllers
 {
-    public class HomeController : Controller
-    {
-        public ActionResult Index()
-        {
-            return View();
-        }
+	public class HomeController : Controller
+	{
+		public ActionResult Index()
+		{
+			return View();
+		}
 
-        public ActionResult Error(string msg)
-        {
-            ViewBag.Message = msg;
-            return View();
-        }
-    }
+		public ActionResult Error(string msg)
+		{
+			ViewBag.Message = msg;
+			return View();
+		}
+	}
 }

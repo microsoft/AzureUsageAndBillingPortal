@@ -1,5 +1,5 @@
 ﻿//------------------------------------------ START OF LICENSE -----------------------------------------
-//Azure Usage Insights Portal
+//Azure Usage and Billing Insights
 //
 //Copyright(c) Microsoft Corporation
 //
@@ -22,51 +22,53 @@
 //OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 //CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //----------------------------------------------- END OF LICENSE ------------------------------------------
+
 using System;
 using System.Collections.Generic;
-
 using Commons;
 
 namespace Dashboard.Models
 {
-    public class DashboardCSVModel
-    {
-        public int startDateMonth { get; set; }
-        public int startDateDay { get; set; }
-        public int startDateYear { get; set; }
-        public int endDateMonth { get; set; }
-        public int endDateDay { get; set; }
-        public int endDateYear { get; set; }
-        public bool dailyReport { get; set; }
-        public bool detailedReport { get; set; }
-        public List<string> selectedUserSubscriptions { get; set; }
-        public Dictionary<string, Subscription> userSubscriptionsList { get; set; }
-        public Dictionary<string, ReportRequest> repReqsList { get; set; }
-        public DashboardCSVModel()
-        {
-            Reset();
-        }
-        public void Reset()
-        {
-            DateTime currentDate = DateTime.Now.AddMonths(-1);
+	public class DashboardCsvModel
+	{
+		public int startDateMonth { get; set; }
+		public int startDateDay { get; set; }
+		public int startDateYear { get; set; }
+		public int endDateMonth { get; set; }
+		public int endDateDay { get; set; }
+		public int endDateYear { get; set; }
+		public bool dailyReport { get; set; }
+		public bool detailedReport { get; set; }
+		public List<Guid> selectedUserSubscriptions { get; set; }
+		public Dictionary<Guid, Subscription> userSubscriptionsList { get; set; }
+		public Dictionary<Guid, ReportRequest> repReqsList { get; set; }
 
-            startDateMonth = currentDate.Month;
-            startDateDay = currentDate.Day;
-            startDateYear = currentDate.Year;
+		public DashboardCsvModel()
+		{
+			Reset();
+		}
 
-            currentDate = DateTime.Now;
-            endDateMonth = currentDate.Month;
-            endDateDay = currentDate.Day;
-            endDateYear = currentDate.Year;
+		public void Reset()
+		{
+			DateTime currentDate = DateTime.UtcNow.Date.AddMonths(-1);
 
-            dailyReport = true;
+			startDateMonth = currentDate.Month;
+			startDateDay = currentDate.Day;
+			startDateYear = currentDate.Year;
 
-            detailedReport = false;
+			currentDate = DateTime.UtcNow.Date;
+			endDateMonth = currentDate.Month;
+			endDateDay = currentDate.Day;
+			endDateYear = currentDate.Year;
 
-            selectedUserSubscriptions = new List<string>();
+			dailyReport = true;
 
-            userSubscriptionsList = new Dictionary<string, Subscription>();
-            repReqsList = new Dictionary<string, ReportRequest>();
-        }
-    }
+			detailedReport = false;
+
+			selectedUserSubscriptions = new List<Guid>();
+
+			userSubscriptionsList = new Dictionary<Guid, Subscription>();
+			repReqsList = new Dictionary<Guid, ReportRequest>();
+		}
+	}
 }

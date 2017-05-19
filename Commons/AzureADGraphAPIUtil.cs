@@ -1,5 +1,5 @@
 ﻿//------------------------------------------ START OF LICENSE -----------------------------------------
-//Azure Usage Insights Portal
+//Azure Usage and Billing Insights
 //
 //Copyright(c) Microsoft Corporation
 //
@@ -22,54 +22,57 @@
 //OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 //CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //----------------------------------------------- END OF LICENSE ------------------------------------------
+
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System.Configuration;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Helpers;
+using System;
+using System.Threading.Tasks;
 
 namespace Commons
 {
-    public static class AzureADGraphAPIUtil
-    {
-        public static string GetObjectIdOfServicePrincipalInOrganization(string organizationId, string applicationId)
-        {
-            string objectId = null;
+	public static class AzureAdGraphApiUtil
+	{
+		private static readonly string ClientId = ConfigurationManager.AppSettings["ida:ClientId"];
+		private static readonly string Password = ConfigurationManager.AppSettings["ida:Password"];
+		private static readonly string Authority = ConfigurationManager.AppSettings["ida:Authority"];
+		private static readonly string GraphApiIdentifier = ConfigurationManager.AppSettings["ida:GraphApiIdentifier"];
+		private static readonly string GraphApiVersion = ConfigurationManager.AppSettings["ida:GraphApiVersion"];
 
-            try
-            {
-                // Aquire App Only Access Token to call Azure Resource Manager - Client Credential OAuth Flow
-                ClientCredential credential = new ClientCredential(
-                                                        ConfigurationManager.AppSettings["ida:ClientID"],
-                                                        ConfigurationManager.AppSettings["ida:Password"]);
+		public static string GetObjectIdOfServicePrincipalInOrganization(string organizationId, string applicationId)
+		{
+			string objectId = null;
 
-                // initialize AuthenticationContext with the token cache of the currently signed in user, as kept in the app's EF DB
-                AuthenticationContext authContext = new AuthenticationContext(string.Format(ConfigurationManager.AppSettings["ida:Authority"], organizationId));
-                AuthenticationResult result = authContext.AcquireToken(ConfigurationManager.AppSettings["ida:GraphAPIIdentifier"], credential);
+			try {
+				// Aquire App Only Access Token to call Azure Resource Manager - Client Credential OAuth Flow
+				ClientCredential credential = new ClientCredential(ClientId, Password);
 
-                // Get a list of Organizations of which the user is a member
-                string requestUrl = string.Format("{0}{1}/servicePrincipals?api-version={2}&$filter=appId eq '{3}'",
-                                                    ConfigurationManager.AppSettings["ida:GraphAPIIdentifier"], organizationId,
-                                                    ConfigurationManager.AppSettings["ida:GraphAPIVersion"], applicationId);
+				// initialize AuthenticationContext with the token cache of the currently signed in user, as kept in the app's EF DB
+				AuthenticationContext authContext = new AuthenticationContext(String.Format(Authority, organizationId));
+				AuthenticationResult result = authContext.AcquireTokenAsync(GraphApiIdentifier, credential).GetAwaiter().GetResult();
 
-                // Make the GET request
-                HttpClient client = new HttpClient();
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
-                HttpResponseMessage response = client.SendAsync(request).Result;
+				// Get a list of Organizations of which the user is a member
+				string requestUrl = $"{GraphApiIdentifier}{organizationId}/servicePrincipals?api-version={GraphApiVersion}&$filter=appId eq '{applicationId}'";
 
-                // Endpoint should return JSON with one or none serviePrincipal object
-                if (response.IsSuccessStatusCode)
-                {
-                    string responseContent = response.Content.ReadAsStringAsync().Result;
-                    var servicePrincipalResult = (Json.Decode(responseContent)).value;
-                    if (servicePrincipalResult != null && servicePrincipalResult.Length > 0)
-                        objectId = servicePrincipalResult[0].objectId;
-                }
-            }
-            catch { }
+				// Make the GET request
+				using (HttpClient client = new HttpClient()) {
+					using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl)) {
+						request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
+						HttpResponseMessage response = client.SendAsync(request).Result;
 
-            return objectId;
-        }
-    }
+						// Endpoint should return JSON with one or none serviePrincipal object
+						if (response.IsSuccessStatusCode) {
+							string responseContent = response.Content.ReadAsStringAsync().Result;
+							var servicePrincipalResult = (Json.Decode(responseContent)).value;
+							if (servicePrincipalResult != null && servicePrincipalResult.Length > 0) objectId = servicePrincipalResult[0].objectId;
+						}
+					}
+				}
+			} catch { }
+
+			return objectId;
+		}
+	}
 }

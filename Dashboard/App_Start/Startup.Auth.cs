@@ -1,5 +1,5 @@
 ﻿//------------------------------------------ START OF LICENSE -----------------------------------------
-//Azure Usage Insights Portal
+//Azure Usage and Billing Insights
 //
 //Copyright(c) Microsoft Corporation
 //
@@ -22,40 +22,36 @@
 //OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 //CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //----------------------------------------------- END OF LICENSE ------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Globalization;
-using System.Linq;
-using System.Web;
-using Owin;
+
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OpenIdConnect;
+using Owin;
+using System.Configuration;
 
 namespace Dashboard
 {
-    public partial class Startup
-    {
-        public void ConfigureAuth(IAppBuilder app)
-        {
-            string clientId = ConfigurationManager.AppSettings["ida:ClientID"];
-            string aadInstance = ConfigurationManager.AppSettings["ida:AADInstance"];
-            string tenantId = ConfigurationManager.AppSettings["ida:TenantId"];
-            string authority = aadInstance + tenantId;
-            string postLogoutRedirectUri = ConfigurationManager.AppSettings["ida:PostLogoutRedirectUri"];
+	public partial class Startup
+	{
+		private readonly static string ClientId = ConfigurationManager.AppSettings["ida:ClientId"];
+		private readonly static string AadInstance = ConfigurationManager.AppSettings["ida:AadInstance"];
+		private readonly static string TenantId = ConfigurationManager.AppSettings["ida:TenantId"];
+		private readonly static string Authority = AadInstance + TenantId;
+		private readonly static string PostLogoutRedirectUri = ConfigurationManager.AppSettings["ida:PostLogoutRedirectUri"];
 
-            app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
+		public void ConfigureAuth(IAppBuilder app)
+		{
+			app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
 
-            app.UseCookieAuthentication(new CookieAuthenticationOptions());
+			app.UseCookieAuthentication(new CookieAuthenticationOptions());
 
-            app.UseOpenIdConnectAuthentication(
-                new OpenIdConnectAuthenticationOptions
-                {
-                    ClientId = clientId,
-                    Authority = authority,
-                    PostLogoutRedirectUri = postLogoutRedirectUri
-                });
-        }
-    }
+			app.UseOpenIdConnectAuthentication(
+				new OpenIdConnectAuthenticationOptions
+				{
+					ClientId = ClientId,
+					Authority = Authority,
+					PostLogoutRedirectUri = PostLogoutRedirectUri
+				});
+		}
+	}
 }

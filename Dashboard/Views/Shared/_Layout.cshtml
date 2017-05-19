@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - Microsoft Azure Subscription Usage Dashboard</title>
+    <title>@ViewBag.Title - Azure Usage Billing Insights Dashboard</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
 </head>
@@ -14,12 +14,13 @@
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
                 </button>
-                @Html.ActionLink("Home", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                @Html.ActionLink("Azure Usage Billing Insights", "Index", "Dashboard", new { area = "" }, new { @class = "navbar-brand" })
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Usage Dashboard", "Index", "Dashboard")</li>
+                    <li>@Html.ActionLink("Dashboard", "Index", "Dashboard")</li>
                 </ul>
                 @Html.Partial("_LoginPartial")
             </div>
@@ -29,7 +30,7 @@
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year - Microsoft Azure Subscription Usage Dashboard v4</p>
+            <p>&copy; @DateTime.Now.Year Microsoft</p>
         </footer>
     </div>
 

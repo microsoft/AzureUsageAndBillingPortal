@@ -1,5 +1,5 @@
 ﻿//------------------------------------------ START OF LICENSE -----------------------------------------
-//Azure Usage Insights Portal
+//Azure Usage and Billing Insights
 //
 //Copyright(c) Microsoft Corporation
 //
@@ -22,47 +22,47 @@
 //OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 //CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //----------------------------------------------- END OF LICENSE ------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs;
 
 using Commons;
+using Microsoft.Azure.WebJobs;
+using System;
+using System.Diagnostics;
 
 namespace WebJobBillingData
 {
-    // To learn more about Microsoft Azure WebJobs SDK, please see http://go.microsoft.com/fwlink/?LinkID=320976
-    class Program
-    {
-        // Please set the following connection strings in app.config for this WebJob to run:
-        // AzureWebJobsDashboard and AzureWebJobsStorage
-        static void Main()
-        {
-            Console.WriteLine("*************************************************************************");
-            Console.WriteLine("WebJobUsageHistory:Main starting. DateTimeUTC: {0}", DateTime.UtcNow);
+	// To learn more about Microsoft Azure WebJobs SDK, please see http://go.microsoft.com/fwlink/?LinkID=320976
+	// https://azure.microsoft.com/en-us/documentation/articles/billing-usage-rate-card-overview/
+	// https://github.com/Azure/BillingCodeSamples
 
+	class Program
+	{
+		// Please set the following connection strings in app.config for this WebJob to run:
+		// AzureWebJobsDashboard and AzureWebJobsStorage
+		static void Main()
+		{
+			if (Environment.UserInteractive) {
+				// test only
+				DateTime endDate = DateTime.UtcNow.Date;
+				DateTime startDate = endDate.AddDays(-10);
+				Guid subscriptionId = new Guid("[put subscription id here]");
+				Guid organizationId = new Guid("[put organization id here]");
+				BillingRequest br = new BillingRequest(subscriptionId, organizationId, startDate, endDate);
+				Functions.ProcessQueueMessage(br);
+				Console.WriteLine("Press any key");
+				Console.ReadLine();
+			} else {
+				Trace.TraceInformation("*************************************************************************");
+				Trace.TraceInformation($"{nameof(WebJobBillingData)}:{nameof(Main)} starting. DateTime UTC: {DateTime.UtcNow}");
 
-/*/
-            DateTime sdt = DateTime.Now.AddYears(-3);
-            DateTime edt = DateTime.Now.AddDays(-1);
-            BillingRequest br = new BillingRequest("30d4242f-1afc-49d9-a993-59d0de83b5bd",
-                                                    "72f988bf-86f1-41af-91ab-2d7cd011db47",
-                                                    sdt, //Convert.ToDateTime("2015-10-28 00:00:00.000"),
-                                                    edt);//Convert.ToDateTime("2015-10-29 00:00:00.000"));
-            Functions.ProcessQueueMessage(br);
-            return;
-/**/
+				JobHostConfiguration config = new JobHostConfiguration();
+				config.Queues.BatchSize = 3;
+				config.Queues.MaxDequeueCount = 3;
+				config.Queues.MaxPollingInterval = TimeSpan.FromSeconds(15);
 
-            JobHostConfiguration config = new JobHostConfiguration();
-            config.Queues.BatchSize = 3;
-            config.Queues.MaxDequeueCount = 3;
-            config.Queues.MaxPollingInterval = TimeSpan.FromSeconds(15);
-
-            var host = new JobHost(config);
-            // The following code ensures that the WebJob will be running continuously
-            host.RunAndBlock();
-        }
-    }
+				var host = new JobHost(config);
+				// The following code ensures that the WebJob will be running continuously
+				host.RunAndBlock();
+			}
+		}
+	}
 }

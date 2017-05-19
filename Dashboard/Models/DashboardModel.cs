@@ -1,5 +1,5 @@
 ﻿//------------------------------------------ START OF LICENSE -----------------------------------------
-//Azure Usage Insights Portal
+//Azure Usage and Billing Insights
 //
 //Copyright(c) Microsoft Corporation
 //
@@ -22,29 +22,25 @@
 //OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 //CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //----------------------------------------------- END OF LICENSE ------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Commons;
+using System;
+using System.Collections.Generic;
 
 namespace Dashboard.Models
 {
-    public class DashboardModel
-    {
-        public Dictionary<string, Subscription> subscriptionList { get; set; }
+	public class DashboardModel
+	{
+		public Dictionary<Guid, Subscription> subscriptionList { get; set; }
 
-        public DashboardModel()
-        {
-            Reset();
-        }
+		public DashboardModel()
+		{
+			Reset();
+		}
 
-        public void Reset()
-        {
-            subscriptionList = new Dictionary<string, Subscription>();
-        }
-
-    }
+		public void Reset()
+		{
+			subscriptionList = new Dictionary<Guid, Subscription>();
+		}
+	}
 }

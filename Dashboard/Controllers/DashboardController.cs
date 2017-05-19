@@ -1,5 +1,5 @@
 ﻿//------------------------------------------ START OF LICENSE -----------------------------------------
-//Azure Usage Insights Portal
+//Azure Usage and Billing Insights
 //
 //Copyright(c) Microsoft Corporation
 //
@@ -22,6 +22,7 @@
 //OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 //CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //----------------------------------------------- END OF LICENSE ------------------------------------------
+
 using Commons;
 using Dashboard.Models;
 using Microsoft.WindowsAzure.Storage;
@@ -35,59 +36,55 @@ using System.Web.Mvc;
 
 namespace Dashboard.Controllers
 {
-    //[Authorize]
-    public class DashboardController : Controller
-    {
-        static private DashboardModel dm = new DashboardModel();
-        private DataAccess db = new DataAccess();
+	//[Authorize]
+	public class DashboardController : Controller
+	{
+		static private DashboardModel dm = new DashboardModel();
+		private DataAccess db = new DataAccess();
 
-        public ActionResult Index()
-        {
-            dm.subscriptionList.Clear();
-            foreach (var s in db.Subscriptions.OrderBy(e => e.DisplayTag))
-                dm.subscriptionList.Add(s.Id, s);
+		public ActionResult Index()
+		{
+			dm.subscriptionList.Clear();
 
-            return View(dm);
-        }
+			foreach (var s in db.Subscriptions.OrderBy(e => e.DisplayTag))
+				dm.subscriptionList.Add(s.Id, s);
 
-        public async Task<ActionResult> ProcessSelectedIds(string[] selectedIDs)
-        {
-            try
-            {
-                foreach (string sid in selectedIDs)
-                {
-                    Subscription subs = dm.subscriptionList[sid];
-                    if (subs == null)
-                        continue;
+			return View(dm);
+		}
 
-                    // Following sendToQueue and SaveToDB must be atomic
-                    DateTime sdt = DateTime.Now.AddYears(-3);
-                    DateTime edt = DateTime.Now.AddDays(-1);
-                    BillingRequest br = new BillingRequest(subs.Id, subs.OrganizationId, sdt, edt);
+		public async Task<ActionResult> ProcessSelectedIds(Guid[] selectedIDs)
+		{
+			try {
+				foreach (Guid sid in selectedIDs) {
+					Subscription subs = dm.subscriptionList[sid];
+					if (subs == null)
+						continue;
 
-                    var storageAccount = CloudStorageAccount.Parse(ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ToString());
-                    CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
-                    CloudQueue subscriptionsQueue = queueClient.GetQueueReference(ConfigurationManager.AppSettings["ida:QueueBillingDataRequests"].ToString());
-                    subscriptionsQueue.CreateIfNotExists();
-                    var queueMessage = new CloudQueueMessage(JsonConvert.SerializeObject(br));
-                    await subscriptionsQueue.AddMessageAsync(queueMessage);
+					// Following sendToQueue and SaveToDB must be atomic
+					DateTime sdt = DateTime.UtcNow.Date.AddYears(-3);
+					DateTime edt = DateTime.UtcNow.Date.AddDays(-1);
+					BillingRequest br = new BillingRequest(subs.Id, subs.OrganizationId, sdt, edt);
 
-                    Subscription s = db.Subscriptions.Find(sid);
-                    if (s != null)
-                    {
-                        s.DataGenDate = DateTime.UtcNow;
-                        s.DataGenStatus = DataGenStatus.Pending;
-                        db.Entry(s).State = System.Data.Entity.EntityState.Modified;
-                        db.SaveChanges();
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                return RedirectToAction("Error", "Home", new {msg = e.Message });
-            }
+					var storageAccount = CloudStorageAccount.Parse(ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ToString());
+					CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
+					CloudQueue subscriptionsQueue = queueClient.GetQueueReference(ConfigurationManager.AppSettings["ida:QueueBillingDataRequests"].ToString());
+					subscriptionsQueue.CreateIfNotExists();
+					var queueMessage = new CloudQueueMessage(JsonConvert.SerializeObject(br));
+					await subscriptionsQueue.AddMessageAsync(queueMessage);
 
-            return RedirectToAction("Index", "Dashboard");
-        }
-    }
+					Subscription s = db.Subscriptions.Find(sid);
+					if (s != null) {
+						s.DataGenDate = DateTime.UtcNow;
+						s.DataGenStatus = DataGenStatus.Pending;
+						db.Entry(s).State = System.Data.Entity.EntityState.Modified;
+						db.SaveChanges();
+					}
+				}
+			} catch (Exception e) {
+				return RedirectToAction("Error", "Home", new { msg = e.Message });
+			}
+
+			return RedirectToAction("Index", "Dashboard");
+		}
+	}
 }
