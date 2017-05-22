@@ -1,6 +1,4 @@
-#Azure Usage and Billing Insights (AUBI) Portal
-
-
+# Azure Usage and Billing Insights (AUBI) Portal
 
 This project is designed to retrieve the usage details of all Azure services in a specific Azure subscription(s). Using PowerBI dashboard, one can retrieve up to date billing data (Azure service usage details) of a subscription that is registered to the system. 
 First, any user with an active azure subscription has to register their subscription with the system through the registration website. To get registered, only the subscription owner's Microsoft ID (i.e. email address that ends with Hotmail.com, outlook.com etc.) or an organization ID (i.e. email address that ends with microsoft.com, fabrikam.com etc.) and subscription’s domain name is needed. Providing this data, a user can register their Azure subscription with the system.
@@ -20,8 +18,8 @@ This system consists of the following services:
 
 The PowerBI dashboard allows users to filter data in realtime according to different parameters such as: Subscriptions, Services, SubServices, etc.
 
-##Click for [video tutorial](https://channel9.msdn.com/blogs/Mustafa-Kasap/How-to-Setup-the-Azure-Usage--Billing-Portal) on end to end Setup Instructions
-##Click for [Setup Instructions](./Documentation/HOWTO.md)
+## Click for [video tutorial](https://channel9.msdn.com/blogs/Mustafa-Kasap/How-to-Setup-the-Azure-Usage--Billing-Portal) on end to end Setup Instructions
+## Click for [Setup Instructions](./Documentation/HOWTO.md)
 
 Sample Report screenshot:
 ![](./Documentation/imgs/img21.png)  
