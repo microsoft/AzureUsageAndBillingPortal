@@ -48,7 +48,7 @@ namespace WebJobBillingData
 		private static readonly string Locale = ConfigurationManager.AppSettings["ida:Locale"];
 		private static readonly string RegionInfo = ConfigurationManager.AppSettings["ida:RegionInfo"];
 		private static readonly string RetryCountToProcessMessage = ConfigurationManager.AppSettings["ida:RetryCountToProcessMessage"];
-		private static readonly string SqlConnectionString = ConfigurationManager.ConnectionStrings["SqlConnection"]?.ConnectionString;
+		private static readonly string SqlConnectionString = ConfigurationManager.ConnectionStrings["ASQLConn"]?.ConnectionString;
 
 		public static void ProcessQueueMessage([QueueTrigger("billingdatarequests")] BillingRequest billingRequest, TextWriter logWriter = null)
 		{

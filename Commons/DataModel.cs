@@ -85,10 +85,17 @@ namespace Commons
 
 	public class BillingRequest
 	{
-		public Guid SubscriptionId { get; private set; }
-		public Guid OrganizationId { get; private set; }
-		public DateTime StartDate { get; private set; }
-		public DateTime EndDate { get; private set; }
+        [JsonProperty("SubscriptionId")]
+        public Guid SubscriptionId { get; private set; }
+
+        [JsonProperty("OrganizationId")]
+        public Guid OrganizationId { get; private set; }
+
+        [JsonProperty("StartDate")]
+        public DateTime StartDate { get; private set; }
+
+        [JsonProperty("EndDate")]
+        public DateTime EndDate { get; private set; }
 
 		public BillingRequest() { }
 

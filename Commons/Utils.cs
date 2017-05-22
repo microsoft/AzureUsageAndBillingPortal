@@ -33,7 +33,7 @@ namespace Commons
 {
 	public static class Utils
 	{
-		private static readonly string SqlConnectionString = ConfigurationManager.ConnectionStrings["SqlConnection"]?.ConnectionString;
+		private static readonly string SqlConnectionString = ConfigurationManager.ConnectionStrings["ASQLConn"]?.ConnectionString;
 
 		public static void UpdateSubscriptionStatus(Guid id, DataGenStatus dgs, DateTime dt)
 		{
