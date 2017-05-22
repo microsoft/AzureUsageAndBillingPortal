@@ -1,8 +1,8 @@
-#Azure Usage and Billing Insights (AUBI) Portal
+# Azure Usage and Billing Insights (AUBI) Portal
 
 
 ## System setup
-###Creating required services with Powershell script:
+### Creating required services with Powershell script:
 First you have to create the required Azure services and keep the records of service access keys that will be used in the   projects' configuration files named: **App.config** and **Web.config**. For the below services we will primarily use the default creation parameters. For higher performance criterion, you can change default settings by i.e. increasing instance count of web app or scale Web app or SQL Server to a higher tier etc. 
 
 Required Services:
@@ -112,7 +112,7 @@ Web Apps publish parameters set to clean all existing files in the webapp folder
 To publish the dashboard project you use the similar publish steps and select the Dashboard WebApp in the Arm template created empty WebApp project list. Also you have to enter authentication Active Directory (AD), so only the users defined under this AD will be able to access the Dashboard webpage.  
 ![](./imgs/img11_5.png)
 
-**WebJobBillingData Project:** 
+** WebJobBillingData Project:** 
 
 Update the corresponding parameters in App.config file with the ones in the Powershell script output. This webjob project is created as a continuous webjob type. So it will always run in the background and in case there is a message in the storage queue, it will trigger a specific function in the project. So if you update the “ida:QueueBillingDataRequests” parameter in the config files, you have to update the function signature with new parameter value which has to be static coded in the function.cs file of the WebJobBillingData project as:
 ```
