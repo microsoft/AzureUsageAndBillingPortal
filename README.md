@@ -1,3 +1,7 @@
+# Project Update August 1, 2018
+
+This project is not currently being maintained.  We recommend taking a look at the latest Azure Billing API information [here](https://docs.microsoft.com/en-us/azure/billing/billing-usage-rate-card-overview).  You can also take a look at the available [partner solutions](https://docs.microsoft.com/en-us/azure/billing/billing-usage-rate-card-overview#partner-solutions) and the all up documentation on [Azure Billing and Cost Management](https://docs.microsoft.com/en-us/azure/billing/).
+
 # Azure Usage and Billing Insights (AUBI) Portal
 
 This project is designed to retrieve the usage details of all Azure services in a specific Azure subscription(s). Using PowerBI dashboard, one can retrieve up to date billing data (Azure service usage details) of a subscription that is registered to the system. 
