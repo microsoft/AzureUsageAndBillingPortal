@@ -276,7 +276,7 @@ public class RecordDataReader<T> : DbDataReader
 				writer.WritePropertyName("Name");
 				writer.WriteValue(key.ToString());
 				writer.WritePropertyName("Value");
-				writer.WriteValue(value.ToString());
+				writer.WriteValue((value ?? "").ToString());
 				writer.WriteEndObject();
 			}
 			writer.WriteEndArray();
